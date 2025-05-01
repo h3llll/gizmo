@@ -1,0 +1,49 @@
+if you wish to contribute you must follow these rules :
+
+1. go crazy with comments(not too much), but actual variable names and 
+function names should make sense. 
+
+2. only use the provided .clang-format file. 
+if you use another formatter replicate the rules.
+
+3. ONLY USE SNAKE CASE. EVERYTHING. (macros go capital snake case)
+
+4. MODULARITY IS STRICT. so for every module (ex window) it only requires its 
+dependencies and it doesn't use any external library which doesn't feed in
+the purpose of such module
+
+so if you're implementing a renderer module, you might want to use libGL and 
+cglm, but don't you ever link with glfw.
+
+this allows for more flexibility so i can switch out window handlers or graphics
+libraries without much hassle, also makes project look pretty
+
+5. see project structure, copy project structure 
+if you want to make a module lets call it "funny"
+
+"funny" has a meson.build which creates a shared library and overrides any 
+already existing dependency with the same name unless it is already used and
+is made into a dependency
+
+"funny" is included in root meson.build
+
+"funny" has src and include directories (obviously)
+
+"funny" is in /modules/funny
+
+"funny" exposes it's headers via /modules/funny/include/funny
+
+"funny"'s source file names MUST match the header names.
+
+finally, write your pr title as long as you want it to be but PLEASE don't 
+make it too short, attempt to describe whatever the fuck you did 
+because i am not reading file changes.
+
+if you want to communicate message me on discord!!
+
+itsafknvery
+
+
+
+(of course i'm above all rules since this is my own project eat my ass)
+(seriously tho feel free to fix the stupid shit i do)

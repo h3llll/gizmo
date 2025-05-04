@@ -6,6 +6,9 @@
 #define RENDERER_ERR_ALLOC      1 // error allocating memory
 #define RENDERER_ERR_GLADFAIL  2 // glad error occured
 #define RENDERER_ERR_INVALARG   3 // null/bad argument
+
+#define FLOAT_PER_VERTEX 3
+
 #include <stdint.h>
 
 // Int representation of color, tiny bit slower to use since it is devided by
@@ -25,6 +28,8 @@ typedef struct colorf
 // Holds renderer information such as color and buffer objects.
 typedef struct renderer
 {
+    float *vertex_array;
+    uint32_t VAO, VBO, EBO;
     float r, g, b, a;
 } renderer;
 

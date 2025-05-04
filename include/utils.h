@@ -1,6 +1,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include <stdint.h>
 #include <stdio.h>
 
 #define ANSI_RED "\x1b[31m"
@@ -8,21 +9,25 @@
 #define ANSI_RESET "\x1b[0m"
 
 #ifdef DEBUG_BUILD
+
 // clang-format off
 #define LOG_LEVEL_ALL   3
 #define LOG_LEVEL_WARN  2
 #define LOG_LEVEL_ERR   1
 #define LOG_LEVEL_NONE  0
 // clang-format on
+
 #ifndef ACTIVE_LOG_LEVEL
 #define ACTIVE_LOG_LEVEL LOG_LEVEL_ALL
-#endif
+
+#endif // ACTIVE_LOG_LEVEL
 
 #if ACTIVE_LOG_LEVEL >= LOG_LEVEL_ALL
 #define INFO(fmt, ...) fprintf(stderr, "[INFO] " fmt "\n", ##__VA_ARGS__)
 #else
 #define INFO(fmt, ...)
-#endif
+
+#endif // ACTIVE_LOG_LEVEL >= LOG_LEVEL_ALL
 
 #if ACTIVE_LOG_LEVEL >= LOG_LEVEL_WARN
 #define WARN(fmt, ...)                                                    \
@@ -32,7 +37,7 @@
             ##__VA_ARGS__, __FILE__, __func__, __LINE__)
 #else
 #define WARN(fmt, ...)
-#endif
+#endif // ACTIVE_LOG_LEVEL >= LOG_LEVEL_WARN
 
 #if ACTIVE_LOG_LEVEL >= LOG_LEVEL_ERR
 #define ERR(fmt, ...)                                                     \
@@ -42,16 +47,14 @@
             ##__VA_ARGS__, __FILE__, __func__, __LINE__)
 #else
 #define ERR(fmt, ...)
-#endif
+#endif // ACTIVE_LOG_LEVEL >= LOG_LEVEL_ERR
 
 #else
 
 #define INFO(fmt, ...)
 #define WARN(fmt, ...)
 #define ERR(fmt, ...)
-
-#endif
-#endif
+#endif // DEBUG_BUILD
 
 #define IS_NULL(ptr, code, module)                                        \
     do                                                                    \
@@ -84,3 +87,32 @@
             free_fn(ptr);                                                 \
         }                                                                 \
     } while (0)
+
+#define UTIL_IMP
+
+#ifdef UTIL_IMP
+
+#define UTIL_NO_ERR         0
+#define UTIL_ERR_INVALARG   1
+#define UTIL_ERR_ALLOC      2
+
+#include <stdlib.h>
+
+uint8_t static inline read_file(const char *path, char *result)
+{
+    uint8_t exit_code = UTIL_NO_ERR;
+
+    INFO("[UTILS] reading file %s", path);
+    size_t size = 30;
+    char *_result = malloc(sizeof(char) * size);
+    IS_NULL(_result, UTIL_ERR_ALLOC, "UTIL");
+
+    return exit_code;
+
+cleanup:
+    return exit_code;
+}
+
+#endif // UTIL_IMP
+
+#endif

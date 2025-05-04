@@ -3,14 +3,14 @@
 
 i don't know what are my goals with this thing buuuuut
 
-Window module -> (WIP)
+Window module -> (Done)
 Poll based input -> (Done)
 
-Event based input -> (Testing(refactoring atm))
+Event based input -> (Done)
 
 Actual window -> (Done)
 
-Error logging -> (WIP) -> need to fix some macro shit
+Error logging -> (Done)
 Common callbacks -> (Done)
 
 Renderer module -> (WIP)
@@ -31,7 +31,7 @@ Audio module -> (WIP) (no plans yet)
 
 ECS module -> (WIP) (no plans yet)
 
-UI -> (WIP) (no plans yet) (gonna have to get a ui designer here)
+UI -> (WIP) (no plans yet) 
 
 for contribution, read docs/STYLE or something idk but it's def in docs
 

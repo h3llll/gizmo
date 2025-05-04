@@ -25,16 +25,7 @@ uint8_t renderer_create(renderer **result, const char *vert_path,
     uint8_t exit_code = RENDERER_NO_ERR;
 
     INFO("[RENDERER] creating renderer");
-    
-    char *vert_src =
-        "#version 330 core\n"
-        "layout (location = 0) in vec3 aPos;\n"
-        "void main()\n"
-        "{\n"
-        "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-        "}\0";
 
-    char *frag_src = "";
     renderer *_result = NULL;
     uint32_t VBO, vert_shader;
 
@@ -42,9 +33,8 @@ uint8_t renderer_create(renderer **result, const char *vert_path,
     {
         INFO("[RENDERER] no vert_path was given, using builtin");
     }
-    else 
+    else
     {
-        read_file(vert_path, vert_src);
     }
 
     if (frag_path == NULL)
@@ -53,7 +43,6 @@ uint8_t renderer_create(renderer **result, const char *vert_path,
     }
     else
     {
-        read_file(frag_path, frag_src);
     }
 
     IS_NULL(result, RENDERER_ERR_INVALARG, "RENDERER");
@@ -63,7 +52,6 @@ uint8_t renderer_create(renderer **result, const char *vert_path,
 
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    
 
     _result->r = 0.0f;
     _result->g = 0.0f;

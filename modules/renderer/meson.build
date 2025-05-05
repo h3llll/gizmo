@@ -8,12 +8,16 @@ src_files = run_command(
 ).stdout().strip().split('\n')
 
 gl_dep = dependency('GL')
+memarena_dep = dependency('memarena')
 
 renderer_lib = shared_library(
   'renderer',
   src_files,
   include_directories: [inc_renderer, inc_root],
-  dependencies: [gl_dep],
+  dependencies: [
+    gl_dep,
+    memarena_dep,
+  ],
 )
 
 renderer_dep = declare_dependency(

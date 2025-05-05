@@ -17,10 +17,10 @@ add_global_arguments('-DDEBUG_BUILD', '-DACTIVE_LOG_LEVEL=3', language: 'c')
 list_script = meson.project_source_root() / 'scripts' / 'list-all-src.sh'
 inc_root = include_directories('include')
 
-subdir('modules/renderer')
 subdir('modules/event')
-subdir('modules/window')
 subdir('modules/memarena')
+subdir('modules/renderer')
+subdir('modules/window')
 
 renderer_dep = dependency('renderer')
 window_dep = dependency('window')

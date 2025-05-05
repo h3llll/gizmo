@@ -1,5 +1,6 @@
 #include "renderer/renderer.h"
 #include "glad/glad.h"
+#include "shader.h"
 #include "utils.h"
 #include <stdint.h>
 #include <stdlib.h>
@@ -26,26 +27,24 @@ uint8_t renderer_create(renderer **result, const char *vert_path,
 
     INFO("[RENDERER] creating renderer");
 
+    IS_NULL(result, RENDERER_ERR_INVALARG, "RENDERER");
+    
+    shader *shader = NULL;
     renderer *_result = NULL;
-    uint32_t VBO, vert_shader;
+    uint32_t VBO;
 
     if (vert_path == NULL)
     {
-        INFO("[RENDERER] no vert_path was given, using builtin");
+        INFO("[RENDERER] no vert_path was given, using builtin(wip)");
     }
-    else
-    {
-    }
-
     if (frag_path == NULL)
     {
-        INFO("[RENDERER] no frag_path was given, using builtin");
-    }
-    else
-    {
+        INFO("[RENDERER] no frag_path was given, using builtin(wip)");
     }
 
-    IS_NULL(result, RENDERER_ERR_INVALARG, "RENDERER");
+    RET_ON_FAIL(shader_create(vert_path, frag_path, &shader),
+                SHADER_ERR_ALLOC, RENDERER_ERR_ALLOC, "RENDERER");
+
 
     _result = malloc(sizeof(renderer));
     IS_NULL(_result, RENDERER_ERR_ALLOC, "RENDERER");

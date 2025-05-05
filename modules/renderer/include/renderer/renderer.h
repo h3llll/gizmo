@@ -2,6 +2,7 @@
 #define MODULES_RENDERER_H
 
 // Renderer return errors
+#include "memarena/memarena.h"
 #define RENDERER_NO_ERR 0       // no error
 #define RENDERER_ERR_ALLOC 1    // error allocating memory
 #define RENDERER_ERR_GLADFAIL 2 // glad error occured
@@ -31,6 +32,7 @@ typedef struct renderer
     float *vertex_array;
     uint32_t VAO, VBO, EBO;
     float r, g, b, a;
+    arena *arena; // TODO conmtinue
 } renderer;
 
 /**

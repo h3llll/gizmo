@@ -83,8 +83,8 @@
     {                                                                     \
         if (ptr != NULL)                                                  \
         {                                                                 \
-            ptr = NULL;                                                   \
             free_fn(ptr);                                                 \
+            ptr = NULL;                                                   \
         }                                                                 \
     } while (0)
 
@@ -98,12 +98,12 @@
 
 #include <stdlib.h>
 
-uint8_t static inline read_file(const char *path, char *result)
+uint8_t static inline read_file(const char *path, char **result)
 {
     uint8_t exit_code = UTIL_NO_ERR;
 
     INFO("[UTILS] reading file %s", path);
-    size_t size = 30;
+    size_t size = 25;
     char *_result = malloc(sizeof(char) * size);
     IS_NULL(_result, UTIL_ERR_ALLOC, "UTIL");
 

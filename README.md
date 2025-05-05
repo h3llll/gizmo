@@ -1,31 +1,37 @@
-"funny game engine"
+"funny game library"
 -me 
 
 i don't know what are my goals with this thing buuuuut
 
+Event module -> (Done)
+
 Window module -> (Done)
-Poll based input -> (Done)
 
-Event based input -> (Done)
+    - Poll based input -> (Done)
 
-Actual window -> (Done)
+    - Event based input -> (Done)
 
-Error logging -> (Done)
-Common callbacks -> (Done)
+    - Actual window -> (Done)
+
+    - Error logging -> (Done)
+    
+    - Common callbacks -> (Done)
 
 Renderer module -> (WIP)
-    Basic pipeline -> (WIP)
 
-2D -> (WIP)
-    Simple shape rendering -> (WIP)
-    Textures -> (WIP)
+    - Basic pipeline -> (WIP)
+
+    - 2D -> (WIP)
+        - Simple shape rendering -> (WIP)
+        - Textures -> (WIP)
+
+Memory arena module -> (WIP)
 
 3D -> (WIP)
-    Simple shape rendering -> (WIP)
-    Mesh loading -> (WIP)
-    Textures -> (WIP)
 
-Event module -> (Done)
+    - Simple shape rendering -> (WIP)
+    - Mesh loading -> (WIP)
+    - Textures -> (WIP)
 
 Audio module -> (WIP) (no plans yet)
 

@@ -7,11 +7,12 @@
 #define SHADER_NO_ERR           0
 #define SHADER_ERR_INVALARG     1
 #define SHADER_ERR_COMPILATION  2
+#define SHADER_ERR_ALLOC        3
 // clang-format on
 
 typedef struct shader
 {
-    uint32_t id;
+    uint32_t prog, vert, frag;
 } shader;
 
 // Returns a shader heap object through result pointer.

@@ -7,6 +7,7 @@
 void fb_cb(win_data *windata, int32_t width, int32_t height)
 {
     renderer_set_viewport(0, 0, width, height);
+    printf("resized win %p\n", windata);
 }
 
 void key_cb(event *ev)
@@ -30,7 +31,7 @@ int main(void)
     renderer_module_init((void *)window_get_proc);
 
     renderer *renderer;
-    renderer_create(&renderer);
+    renderer_create(&renderer, "", "");
     renderer_colorf(renderer, 1.0f, 1.0f, 1.0f, 1.0f);
 
     event_system_register(window->input_device->event_sys, key_cb);

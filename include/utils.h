@@ -92,27 +92,68 @@
 
 #ifdef UTIL_IMP
 
+// clang-format off
 #define UTIL_NO_ERR         0
 #define UTIL_ERR_INVALARG   1
 #define UTIL_ERR_ALLOC      2
+#define UTIL_ERR_IO         3
+// clang-format on
 
 #include <stdlib.h>
 
+// WARNING: chatgpt code, this is the only chatgpt code i have,
+// i'll have to review it later but i'm too sleepy now TODO
 uint8_t static inline read_file(const char *path, char **result)
 {
     uint8_t exit_code = UTIL_NO_ERR;
+    FILE *file = NULL;
+    char *_result = NULL;
+    long size = 0;
 
     INFO("[UTILS] reading file %s", path);
-    size_t size = 22;
-    char *_result = malloc(sizeof(char) * size);
+
+    file = fopen(path, "rb"); // use "rb" for binary compatibility
+    IS_NULL(file, UTIL_ERR_IO, "UTIL");
+
+    if (fseek(file, 0, SEEK_END) != 0)
+    {
+        ERR("[UTIL] failed to seek to end of file");
+        exit_code = UTIL_ERR_IO;
+        goto cleanup;
+    }
+
+    size = ftell(file);
+    if (size < 0)
+    {
+        ERR("[UTIL] failed to get file size");
+        exit_code = UTIL_ERR_IO;
+        goto cleanup;
+    }
+
+    rewind(file); // or fseek(file, 0, SEEK_SET);
+
+    _result = malloc(size + 1); // +1 for null-terminator
     IS_NULL(_result, UTIL_ERR_ALLOC, "UTIL");
 
+    size_t read = fread(_result, 1, size, file);
+    if (read != (size_t)size)
+    {
+        ERR("[UTIL] only read %zu of %ld bytes", read, size);
+        exit_code = UTIL_ERR_IO;
+        goto cleanup;
+    }
+
+    _result[size] = '\0';
+    *result = _result;
+
+    fclose(file);
     return exit_code;
 
 cleanup:
+    FREE(file, fclose);
+    FREE(_result, free);
     return exit_code;
 }
-
 #endif // UTIL_IMP
 
-#endif
+#endif // UTILS_H

@@ -126,6 +126,7 @@ uint8_t shader_strip(shader *shader)
 
     glDeleteShader(shader->vert);
     glDeleteShader(shader->frag);
+
     shader->vert = 0;
     shader->frag = 0;
 

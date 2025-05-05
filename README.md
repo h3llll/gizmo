@@ -25,7 +25,7 @@ Renderer module -> (WIP)
         - Simple shape rendering -> (WIP)
         - Textures -> (WIP)
 
-Memory arena module -> (WIP)
+Memory arena module -> (Done)
 
 3D -> (WIP)
 

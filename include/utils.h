@@ -103,7 +103,7 @@ uint8_t static inline read_file(const char *path, char **result)
     uint8_t exit_code = UTIL_NO_ERR;
 
     INFO("[UTILS] reading file %s", path);
-    size_t size = 25;
+    size_t size = 22;
     char *_result = malloc(sizeof(char) * size);
     IS_NULL(_result, UTIL_ERR_ALLOC, "UTIL");
 

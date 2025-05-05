@@ -10,7 +10,10 @@ src_files = run_command(
 memarena_lib = shared_library(
   'memarena',
   src_files,
-  include_directories: [inc_event, inc_root],
+  include_directories: [
+    inc_memarena,
+    inc_root,
+  ],
 )
 
 memarena_dep = declare_dependency(

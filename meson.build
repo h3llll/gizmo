@@ -20,10 +20,12 @@ inc_root = include_directories('include')
 subdir('modules/renderer')
 subdir('modules/event')
 subdir('modules/window')
+subdir('modules/memarena')
 
 renderer_dep = dependency('renderer')
 window_dep = dependency('window')
 event_dep = dependency('event')
+memarena_dep = dependency('memarena')
 
 src_files = run_command(
   list_script,
@@ -38,6 +40,7 @@ executable(
     renderer_dep,
     window_dep,
     event_dep,
+    memarena_dep,
   ],
   include_directories: [
     inc_root,

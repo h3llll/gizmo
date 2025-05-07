@@ -2,6 +2,7 @@
 #define MODULES_RENDERER_H
 
 // clang-format off
+#include "dyarr/dyarr.h"
 #define RENDERER_NO_ERR         0 // no error
 #define RENDERER_ERR_ALLOC      1 // error allocating memory
 #define RENDERER_ERR_GLADFAIL   2 // glad error occured
@@ -41,9 +42,9 @@ typedef struct vertex
 // Holds renderer information such as color and buffer objects.
 typedef struct renderer
 {
-    vertex *vertex_array;
+    array *vertex_array;
+    array *index_array;
     shader *shader;
-    uint32_t *index_array;
     colorf col;
     uint32_t VAO, VBO, EBO;
 

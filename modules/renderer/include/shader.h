@@ -24,4 +24,12 @@ uint8_t shader_create(const char *vert_path, const char *frag_path,
 // Returns SHADER_NO_ERR on success, 0< otherwise.
 uint8_t shader_use(shader *shader);
 
+// Strips the shaders off of the struct, freeing all shaders.
+// Returns SHADER_NO_ERR on success, 0< otherwise.
+uint8_t shader_strip(shader *shader);
+
+// Deallocates the GPU shaders if they exist and destroys the program.
+// Returns SHADER_NO_ERR on success, 0< otherwise.
+uint8_t shader_destroy(shader *shader);
+
 #endif // MODULES_RENDERER_SHADER_H

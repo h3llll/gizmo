@@ -135,3 +135,22 @@ uint8_t shader_strip(shader *shader)
 cleanup:
     return exit_code;
 }
+
+uint8_t shader_destroy(shader *shader)
+{
+    uint8_t exit_code = SHADER_NO_ERR;
+    IS_NULL(shader, SHADER_ERR_INVALARG, "RENDERER->SHADER");
+
+    glDeleteShader(shader->vert);
+    glDeleteShader(shader->frag);
+    glDeleteProgram(shader->prog);
+
+    shader->vert = 0;
+    shader->frag = 0;
+    shader->prog = 0;
+
+    return exit_code;
+
+cleanup:
+    return exit_code;
+}

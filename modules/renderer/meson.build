@@ -8,7 +8,7 @@ src_files = run_command(
 ).stdout().strip().split('\n')
 
 gl_dep = dependency('GL')
-memarena_dep = dependency('memarena')
+dyarr = dependency('dyarr')
 
 renderer_lib = shared_library(
   'renderer',
@@ -16,7 +16,7 @@ renderer_lib = shared_library(
   include_directories: [inc_renderer, inc_root],
   dependencies: [
     gl_dep,
-    memarena_dep,
+    dyarr_dep,
   ],
 )
 

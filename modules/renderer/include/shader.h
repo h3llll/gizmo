@@ -20,4 +20,8 @@ typedef struct shader
 uint8_t shader_create(const char *vert_path, const char *frag_path,
                       shader **result);
 
+// Attaches shader program.
+// Returns SHADER_NO_ERR on success, 0< otherwise.
+uint8_t shader_use(shader *shader);
+
 #endif // MODULES_RENDERER_SHADER_H

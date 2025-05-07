@@ -2,6 +2,7 @@
 #include "glad/glad.h"
 #include "shader.h"
 #include "utils.h"
+#include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -28,10 +29,12 @@ uint8_t renderer_create(renderer **result, const char *vert_path,
     INFO("[RENDERER] creating renderer");
 
     IS_NULL(result, RENDERER_ERR_INVALARG, "RENDERER");
-    
+
+    vertex *vert_arr = NULL;
+    uint32_t ind_arr = NULL;
     shader *shader = NULL;
     renderer *_result = NULL;
-    uint32_t VBO;
+    uint32_t VBO, VAO;
 
     if (vert_path == NULL)
     {
@@ -44,19 +47,37 @@ uint8_t renderer_create(renderer **result, const char *vert_path,
 
     RET_ON_FAIL(shader_create(vert_path, frag_path, &shader),
                 SHADER_ERR_ALLOC, RENDERER_ERR_ALLOC, "RENDERER");
-
+    shader_use(shader);
 
     _result = malloc(sizeof(renderer));
     IS_NULL(_result, RENDERER_ERR_ALLOC, "RENDERER");
 
+    vert_arr = malloc(MAX_FRAME_FLOATS * sizeof(float));
+    ind_arr = malloc(MAX_FRAME_INDICES * sizeof(uint32_t));
+
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-    _result->r = 0.0f;
-    _result->g = 0.0f;
-    _result->b = 0.0f;
-    _result->a = 1.0f;
+    glGenBuffers(1, &VAO);
+    glBindVertexArray(VAO);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
+                          (void *)0);
+
+    glEnableVertexAttribArray(0);
+
+    _result->col = (colorf){
+        .r = 0,
+        .g = 0,
+        .b = 0,
+        .a = 1,
+    };
+
+    _result->VAO = VAO;
     _result->VBO = VBO;
+
+    _result->vertex_array = vert_arr;
+    
 
     *result = _result;
     return exit_code;
@@ -73,10 +94,10 @@ uint8_t renderer_colorf(renderer *renderer, float r, float g, float b,
 
     IS_NULL(renderer, RENDERER_ERR_INVALARG, "RENDERER");
 
-    renderer->r = r;
-    renderer->g = g;
-    renderer->b = b;
-    renderer->a = a;
+    renderer->col.r = r;
+    renderer->col.g = g;
+    renderer->col.b = b;
+    renderer->col.a = a;
 
     return exit_code;
 
@@ -91,10 +112,10 @@ uint8_t renderer_colori(renderer *renderer, int r, int g, int b, int a)
     INFO("[RENDERER] setting renderer color from int");
     IS_NULL(renderer, RENDERER_ERR_INVALARG, "RENDERER");
 
-    renderer->r = (float)r / 255.0f;
-    renderer->g = (float)g / 255.0f;
-    renderer->b = (float)b / 255.0f;
-    renderer->a = (float)a / 255.0f;
+    renderer->col.r = (float)r / 255.0f;
+    renderer->col.g = (float)g / 255.0f;
+    renderer->col.b = (float)b / 255.0f;
+    renderer->col.a = (float)a / 255.0f;
 
     return exit_code;
 
@@ -153,6 +174,7 @@ uint8_t renderer_draw_begin(renderer *renderer)
 {
     uint8_t exit_code = RENDERER_NO_ERR;
     // clear all past frame data, vertex array and everything
+
 cleanup:
     return exit_code;
 }

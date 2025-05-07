@@ -1,15 +1,20 @@
 #ifndef MODULES_RENDERER_H
 #define MODULES_RENDERER_H
 
-// Renderer return errors
-#include "memarena/memarena.h"
-#define RENDERER_NO_ERR 0       // no error
-#define RENDERER_ERR_ALLOC 1    // error allocating memory
-#define RENDERER_ERR_GLADFAIL 2 // glad error occured
-#define RENDERER_ERR_INVALARG 3 // null/bad argument
+// clang-format off
+#define RENDERER_NO_ERR         0 // no error
+#define RENDERER_ERR_ALLOC      1 // error allocating memory
+#define RENDERER_ERR_GLADFAIL   2 // glad error occured
+#define RENDERER_ERR_INVALARG   3 // null/bad argument
 
-#define FLOAT_PER_VERTEX 3
+#define FLOATS_PER_VERTEX    8
+#define MAX_FRAME_VERTICES  1000000
+#define MAX_FRAME_FLOATS    (FLOATS_PER_VERTEX * MAX_FRAME_VERTICES)
+#define MAX_FRAME_INDICES  (MAX_FRAME_VERTICES * 3)
 
+// clang-format on
+
+#include "shader.h"
 #include <stdint.h>
 
 // Int representation of color, tiny bit slower to use since it is devided
@@ -26,13 +31,22 @@ typedef struct colorf
     float r, g, b, a;
 } colorf;
 
+typedef struct vertex
+{
+    float x, y, z;    // pos
+    float u, v;       // text
+    float nx, ny, nz; // norm
+} vertex;
+
 // Holds renderer information such as color and buffer objects.
 typedef struct renderer
 {
-    float *vertex_array;
+    vertex *vertex_array;
+    shader *shader;
+    uint32_t *index_array;
+    colorf col;
     uint32_t VAO, VBO, EBO;
-    float r, g, b, a;
-    arena *arena; // TODO conmtinue
+
 } renderer;
 
 /**
@@ -40,7 +54,7 @@ typedef struct renderer
  * Returns RENDERER_NO_ERR on success, 0< on failure.
  *
  * Important note : THIS WILL FAIL IF NO WINDOW WAS CREATED BEFOREHAND
- * IF IT PRINTS "failed to load glad" CHECK THE FOLLOWING :
+ * IF IT RETURNS RENDERER_ERR_GLADFAIL CHECK THE FOLLOWING :
  * 1 - if you manually sat the context major and minor versions make sure
  * they match with the provided glad headers
  *

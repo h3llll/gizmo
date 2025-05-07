@@ -18,14 +18,14 @@ list_script = meson.project_source_root() / 'scripts' / 'list-all-src.sh'
 inc_root = include_directories('include')
 
 subdir('modules/event')
-subdir('modules/memarena')
+subdir('modules/dyarr')
 subdir('modules/renderer')
 subdir('modules/window')
 
 renderer_dep = dependency('renderer')
 window_dep = dependency('window')
 event_dep = dependency('event')
-memarena_dep = dependency('memarena')
+dyarr_dep = dependency('dyarr')
 
 src_files = run_command(
   list_script,
@@ -40,7 +40,7 @@ executable(
     renderer_dep,
     window_dep,
     event_dep,
-    memarena_dep,
+    dyarr_dep,
   ],
   include_directories: [
     inc_root,

@@ -16,6 +16,16 @@ uint8_t renderer_module_init(void *(*get_proc_address_func)(const char *))
     RET_ON_FAIL(gladLoadGLLoader(get_proc_address_func), 0,
                 RENDERER_ERR_GLADFAIL, "RENDERER");
 
+    const char *version = (const char *)glGetString(GL_VERSION);
+    if (version)
+    {
+        INFO("[RENDERER] version: %s", version);
+    }
+    else
+    {
+        ERR("[RENDERER] failed to retrieve gl version");
+    }
+
     return exit_code;
 
 cleanup:
@@ -42,8 +52,10 @@ static uint8_t setup_gl(renderer *r, const char *vert_path,
 
     if (shader_create(vert_path, frag_path, &shader) > 0)
     {
-        WARN("couldn't create shader, using fallback");
-        shader_create_fallback(&shader);
+        WARN("[RENDERER->SHADER] couldn't create shader, using fallback");
+        RET_ON_FAIL(shader_create_fallback(&shader),
+                    SHADER_ERR_COMPILATION, SHADER_ERR_COMPILATION,
+                    "RENDERER->SHADER");
     }
     shader_use(shader);
 

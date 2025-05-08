@@ -99,8 +99,9 @@
 
 #include <stdlib.h>
 
-// WARNING: chatgpt code, this is the only chatgpt code i have,
-// i'll have to review it later but i'm too sleepy now TODO
+// WARNING: chatgpt code i'll have to review it later but i'm too 
+// sleepy now TODO
+
 static inline uint8_t read_file(const char *path, char **result)
 {
     uint8_t exit_code = UTIL_NO_ERR;

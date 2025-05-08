@@ -8,6 +8,7 @@
 #define SHADER_ERR_INVALARG     1
 #define SHADER_ERR_COMPILATION  2
 #define SHADER_ERR_ALLOC        3
+#define SHADER_ERR_IO           4
 // clang-format on
 
 typedef struct shader

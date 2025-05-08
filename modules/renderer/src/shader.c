@@ -8,7 +8,7 @@ static const char *base_vert_sh = "#version 330 core"
                                   "layout(location = 0) in vec3 aPos;"
                                   "layout(location = 1) in vec4 aCol;"
                                   "layout(location = 2) in vec2 aUv;"
-                                  "layout(location = 3) in vec3 aNorm)"
+                                  "layout(location = 3) in vec3 aNorm;"
                                   "out vec2 vUV;"
                                   "out vec4 col;"
                                   "void main()"
@@ -29,7 +29,7 @@ static const char *base_frag_sh = "#version 330 core"
 uint8_t shader_compile(uint32_t shader, int32_t type)
 {
     int32_t success;
-    char log[512];
+    char log[512] = {'n', 'o', ' ', 'e', 'r', 'r', 'o', 'r', '\n'};
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
 
     if (!success)
@@ -69,10 +69,10 @@ uint8_t shader_create(const char *vert_path, const char *frag_path,
     IS_NULL(vert_path, SHADER_ERR_INVALARG, "[RENDERER->SHADER]");
     IS_NULL(frag_path, SHADER_ERR_INVALARG, "[RENDERER->SHADER]");
 
-    RET_ON_FAIL(read_file(vert_path, &vert_src), UTIL_ERR_ALLOC,
-                SHADER_ERR_ALLOC, "RENDERER->SHADER");
-    RET_ON_FAIL(read_file(frag_path, &frag_src), UTIL_ERR_ALLOC,
-                SHADER_ERR_ALLOC, "RENDERER->SHADER");
+    RET_ON_FAIL(read_file(vert_path, &vert_src), UTIL_ERR_IO,
+                SHADER_ERR_IO, "RENDERER->SHADER");
+    RET_ON_FAIL(read_file(frag_path, &frag_src), UTIL_ERR_IO,
+                SHADER_ERR_IO, "RENDERER->SHADER");
 
     _result = malloc(sizeof(shader));
     IS_NULL(_result, SHADER_ERR_ALLOC, "RENDERER->SHADER");

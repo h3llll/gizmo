@@ -28,10 +28,13 @@ uint8_t array_create(array **result, size_t initial_cap, size_t item_size)
 
     if (initial_cap % item_size != 0)
     {
-        WARN("permanently unused memory initializing array at %zu "
-             "initial_cap: %zu,\n please initialize the array with "
-             "initial_cap devisable by item_size",
-             initial_cap, item_size % initial_cap);
+        WARN("permanently unused memory initializing array at cap(bytes): "
+             "%zu "
+             "wasted memory: %zu,\n please initialize the array with "
+             "initial_cap devisable by item_size"
+             ", also you could have used array_strip but i have no way to "
+             "tell lol",
+             initial_cap * item_size, item_size % initial_cap);
     }
 
     _result = malloc(sizeof(array));

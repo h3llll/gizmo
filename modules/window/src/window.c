@@ -44,7 +44,6 @@ void window_key_callback(GLFWwindow *glfw_win, int key, int scancode,
                    window->input_device->keyinfo);
         event_system_fire(window->input_device->event_sys,
                           window->input_device->key_down_event);
-        INFO("[WINDOW] fired key down event");
         break;
     }
 
@@ -54,7 +53,6 @@ void window_key_callback(GLFWwindow *glfw_win, int key, int scancode,
                    window->input_device->keyinfo);
         event_system_fire(window->input_device->event_sys,
                           window->input_device->key_released_event);
-        INFO("[WINDOW] fired key release event");
 
         break;
     }
@@ -78,7 +76,6 @@ void window_mb_callback(GLFWwindow *glfw_win, int button, int action,
                    window->input_device->mbinfo);
         event_system_fire(window->input_device->event_sys,
                           window->input_device->mb_down_event);
-        INFO("[WINDOW] fired mouse button down event");
         break;
     }
 
@@ -88,7 +85,6 @@ void window_mb_callback(GLFWwindow *glfw_win, int button, int action,
                    window->input_device->mbinfo);
         event_system_fire(window->input_device->event_sys,
                           window->input_device->mb_released_event);
-        INFO("[WINDOW] fired mouse button release event");
         break;
     }
     }
@@ -106,7 +102,6 @@ void window_mp_callback(GLFWwindow *glfw_win, double x, double y)
 
     event_system_fire(window->input_device->event_sys,
                       window->input_device->mouse_motion_event);
-    INFO("[WINDOW] fired mouse motion event");
 }
 
 uint8_t window_set_fb_callback(window *window, win_framebuffersizefun func)

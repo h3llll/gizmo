@@ -40,7 +40,7 @@ static uint8_t setup_gl(renderer *r, const char *vert_path,
         INFO("[RENDERER] no frag_path was given, using builtin(wip)");
     }
 
-    if (shader_create(vert_path, frag_path, &shader) < 0)
+    if (shader_create(vert_path, frag_path, &shader) > 0)
     {
         WARN("couldn't create shader, using fallback");
         shader_create_fallback(&shader);

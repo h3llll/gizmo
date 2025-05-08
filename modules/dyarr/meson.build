@@ -15,7 +15,7 @@ dyarr_lib = shared_library(
 
 dyarr_dep = declare_dependency(
   include_directories: inc_dyarr,
-  link_with: event_lib,
+  link_with: dyarr_lib,
 )
 
 meson.override_dependency('dyarr', dyarr_dep)

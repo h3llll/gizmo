@@ -1,5 +1,7 @@
 #include "shader.h"
 #include "glad/glad.h"
+
+#define UTIL_IMP
 #include "utils.h"
 
 static const char *base_vert_sh = "#version 330 core"

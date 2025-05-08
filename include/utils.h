@@ -88,8 +88,6 @@
         }                                                                 \
     } while (0)
 
-#define UTIL_IMP
-
 #ifdef UTIL_IMP
 
 // clang-format off
@@ -103,7 +101,7 @@
 
 // WARNING: chatgpt code, this is the only chatgpt code i have,
 // i'll have to review it later but i'm too sleepy now TODO
-inline uint8_t read_file(const char *path, char **result)
+static inline uint8_t read_file(const char *path, char **result)
 {
     uint8_t exit_code = UTIL_NO_ERR;
     FILE *file = NULL;

@@ -8,7 +8,7 @@ src_files = run_command(
 ).stdout().strip().split('\n')
 
 gl_dep = dependency('GL')
-dyarr = dependency('dyarr')
+dyarr_dep = dependency('dyarr')
 
 renderer_lib = shared_library(
   'renderer',

@@ -8,7 +8,7 @@
 #define RENDERER_ERR_GLADFAIL   2 // glad error occured
 #define RENDERER_ERR_INVALARG   3 // null/bad argument
 
-#define FLOATS_PER_VERTEX    8
+#define FLOATS_PER_VERTEX    11
 #define MAX_FRAME_VERTICES  1000000
 #define MAX_FRAME_FLOATS    (FLOATS_PER_VERTEX * MAX_FRAME_VERTICES)
 #define MAX_FRAME_INDICES  (MAX_FRAME_VERTICES * 3)
@@ -35,6 +35,7 @@ typedef struct colorf
 typedef struct vertex
 {
     float x, y, z;    // pos
+    float r, g, b, a; // col
     float u, v;       // text
     float nx, ny, nz; // norm
 } vertex;

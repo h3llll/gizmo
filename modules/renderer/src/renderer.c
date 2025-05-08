@@ -40,8 +40,11 @@ static uint8_t setup_gl(renderer *r, const char *vert_path,
         INFO("[RENDERER] no frag_path was given, using builtin(wip)");
     }
 
-    RET_ON_FAIL(shader_create(vert_path, frag_path, &shader),
-                SHADER_ERR_ALLOC, RENDERER_ERR_ALLOC, "RENDERER");
+    if (shader_create(vert_path, frag_path, &shader) < 0)
+    {
+        WARN("couldn't create shader, using fallback");
+        shader_create_fallback(&shader);
+    }
     shader_use(shader);
 
     glGenBuffers(1, &VBO);
@@ -63,15 +66,20 @@ static uint8_t setup_gl(renderer *r, const char *vert_path,
                           (void *)0);
     glEnableVertexAttribArray(0);
 
-    // vec2 textcord = (u, v)
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(vertex),
-                          (void *)offsetof(vertex, u));
+    // vec4 col = (r, g, b)
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(vertex),
+                          (void *)offsetof(vertex, r));
     glEnableVertexAttribArray(1);
 
-    // vec3 norm = (nx, ny, nz)
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(vertex),
-                          (void *)offsetof(vertex, nx));
+    // vec2 textcord = (u, v)
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(vertex),
+                          (void *)offsetof(vertex, u));
     glEnableVertexAttribArray(2);
+
+    // vec3 norm = (nx, ny, nz)
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(vertex),
+                          (void *)offsetof(vertex, nx));
+    glEnableVertexAttribArray(3);
 
     r->VAO = VAO;
     r->VBO = VBO;
@@ -237,10 +245,33 @@ uint8_t renderer_draw_rect(renderer *renderer, int32_t x, int32_t y,
                            uint32_t width, uint32_t height)
 {
     uint8_t exit_code = RENDERER_NO_ERR;
-    IS_NULL(renderer, RENDERER_ERR_INVALARG, "RENDERER");
-    array *vertices = NULL;
 
-    array_create(); // TODO continue ts
+    IS_NULL(renderer, RENDERER_ERR_INVALARG, "RENDERER");
+
+    float r = renderer->col.r;
+    float g = renderer->col.g;
+    float b = renderer->col.b;
+    float a = renderer->col.a;
+
+    vertex verts[] = {
+        {x, y, 0, r, g, b, a, 0, 0, 0, 0, 0},
+        {x + width, y, 0, r, g, b, a, 1, 0, 0, 0, 0},
+        {x + width, y + height, 0, r, g, b, a, 1, 1, 0, 0, 0},
+        {x, y + height, 0, r, g, b, a, 0, 1, 0, 0, 0}};
+
+    uint32_t inds[] = {0, 1, 2, 2, 3, 0};
+
+    for (size_t i = 0; i < 4; i++)
+        array_put(renderer->vertex_array, &verts[i], sizeof(vertex));
+
+    size_t base_index = renderer->vertex_array->count - 4;
+
+    for (size_t i = 0; i < 6; i++)
+    {
+        uint32_t adjusted_index = base_index + inds[i];
+        array_put(renderer->index_array, &adjusted_index,
+                  sizeof(uint32_t));
+    }
 
 cleanup:
     return exit_code;
@@ -271,7 +302,8 @@ uint8_t renderer_draw_end(renderer *renderer)
                     renderer->vertex_array->count *
                         renderer->vertex_array->item_size,
                     renderer->vertex_array->items);
-    glBufferSubData(GL_ARRAY_BUFFER, 0,
+
+    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0,
                     renderer->index_array->count *
                         renderer->index_array->item_size,
                     renderer->index_array->items);

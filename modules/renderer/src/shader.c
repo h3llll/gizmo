@@ -2,6 +2,28 @@
 #include "glad/glad.h"
 #include "utils.h"
 
+static const char *base_vert_sh = "#version 330 core"
+                                  "layout(location = 0) in vec3 aPos;"
+                                  "layout(location = 1) in vec4 aCol;"
+                                  "layout(location = 2) in vec2 aUv;"
+                                  "layout(location = 3) in vec3 aNorm)"
+                                  "out vec2 vUV;"
+                                  "out vec4 col;"
+                                  "void main()"
+                                  "{"
+                                  "gl_Position = vec4(aPos, 1.0);"
+                                  "col = aCol;"
+                                  "}";
+
+static const char *base_frag_sh = "#version 330 core"
+                                  "in vec2 vUv;"
+                                  "in vec4 col;"
+                                  "out vec4 FragColor;"
+                                  "void main()"
+                                  "{"
+                                  "FragColor = col;"
+                                  "}";
+
 uint8_t shader_compile(uint32_t shader, int32_t type)
 {
     int32_t success;
@@ -105,6 +127,70 @@ cleanup:
     }
     FREE(vert_src, free);
     FREE(frag_src, free);
+    return exit_code;
+}
+
+uint8_t shader_create_fallback(shader **result)
+{
+    uint8_t exit_code = SHADER_NO_ERR;
+
+    uint32_t vert_shader = 0, frag_shader = 0, program = 0;
+    shader *_result = NULL;
+
+    INFO("[RENDERER->SHADER] creating shader");
+
+    _result = malloc(sizeof(shader));
+    IS_NULL(_result, SHADER_ERR_ALLOC, "RENDERER->SHADER");
+
+    vert_shader = glCreateShader(GL_VERTEX_SHADER);
+    frag_shader = glCreateShader(GL_FRAGMENT_SHADER);
+    program = glCreateProgram();
+
+    glShaderSource(vert_shader, 1, (const char *const *)&base_vert_sh,
+                   NULL);
+    glShaderSource(frag_shader, 1, (const char *const *)&base_frag_sh,
+                   NULL);
+
+    RET_ON_FAIL(shader_compile(vert_shader, GL_VERTEX_SHADER),
+                SHADER_ERR_COMPILATION, SHADER_ERR_COMPILATION,
+                "RENDERER->SHADER");
+
+    RET_ON_FAIL(shader_compile(frag_shader, GL_FRAGMENT_SHADER),
+                SHADER_ERR_COMPILATION, SHADER_ERR_COMPILATION,
+                "RENDERER->SHADER");
+
+    glAttachShader(program, vert_shader);
+    glAttachShader(program, frag_shader);
+    glLinkProgram(program);
+
+    int32_t success;
+    char log[512];
+
+    glGetProgramiv(program, GL_LINK_STATUS, &success);
+    if (!success)
+    {
+        glGetProgramInfoLog(program, 512, NULL, log);
+        ERR("[RENDERER->SHADER] failed to link program:\n%s", log);
+        exit_code = SHADER_ERR_COMPILATION;
+    }
+
+    _result->prog = program;
+    _result->vert = vert_shader;
+    _result->frag = frag_shader;
+
+    *result = _result;
+
+    return exit_code;
+
+cleanup:
+    if (vert_shader != 0)
+    {
+        glDeleteShader(vert_shader);
+    }
+    if (frag_shader != 0)
+    {
+        glDeleteShader(frag_shader);
+    }
     return exit_code;
 }
 

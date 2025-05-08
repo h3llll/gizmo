@@ -27,6 +27,25 @@ void window_close_callback(GLFWwindow *glfw_win)
     glfwSetWindowShouldClose(glfw_win, GLFW_TRUE);
 }
 
+// NOTE IMPORTANT TODO HELP VERY IMPORTANT DONT FORGET
+//
+// sharing the data pointer (window->input_device->keyinfo)
+// or (window->input_device->mbinfo) causes a segfault while freeing the
+// input device
+// asan:
+//     #4 0x7b3469e6f47f in event_destroy ../modules/event/src/event.c:151
+//    #5 0x7b3469e885ba in input_device_destroy
+//    ../modules/window/src/window.c:401
+//   #6 0x7b3469e88963 in window_destroy ../modules/window/src/window.c:240
+//   #7 0x5e42ba8cf557 in main ../src/main.c:48
+
+// (use after free, double free or something irdk)
+//
+// quick solution : just use different input_device fields
+//
+// long term solution : make a good data sharing system and data structs
+// and shit
+
 void window_key_callback(GLFWwindow *glfw_win, int key, int scancode,
                          int action, int mods)
 {
@@ -42,8 +61,12 @@ void window_key_callback(GLFWwindow *glfw_win, int key, int scancode,
     {
         event_load(window->input_device->key_down_event,
                    window->input_device->keyinfo);
-        event_system_fire(window->input_device->event_sys,
-                          window->input_device->key_down_event);
+
+        if (window->input_device->key_down_event->data != NULL)
+        {
+            event_system_fire(window->input_device->event_sys,
+                              window->input_device->key_down_event);
+        }
         break;
     }
 
@@ -51,9 +74,11 @@ void window_key_callback(GLFWwindow *glfw_win, int key, int scancode,
     {
         event_load(window->input_device->key_released_event,
                    window->input_device->keyinfo);
-        event_system_fire(window->input_device->event_sys,
-                          window->input_device->key_released_event);
-
+        if (window->input_device->key_released_event->data != NULL)
+        {
+            event_system_fire(window->input_device->event_sys,
+                              window->input_device->key_released_event);
+        }
         break;
     }
     }
@@ -74,8 +99,11 @@ void window_mb_callback(GLFWwindow *glfw_win, int button, int action,
     {
         event_load(window->input_device->mb_down_event,
                    window->input_device->mbinfo);
-        event_system_fire(window->input_device->event_sys,
-                          window->input_device->mb_down_event);
+        if (window->input_device->mb_down_event->data != NULL)
+        {
+            event_system_fire(window->input_device->event_sys,
+                              window->input_device->mb_down_event);
+        }
         break;
     }
 
@@ -83,8 +111,11 @@ void window_mb_callback(GLFWwindow *glfw_win, int button, int action,
     {
         event_load(window->input_device->mb_released_event,
                    window->input_device->mbinfo);
-        event_system_fire(window->input_device->event_sys,
-                          window->input_device->mb_released_event);
+        if (window->input_device->mb_released_event->data != NULL)
+        {
+            event_system_fire(window->input_device->event_sys,
+                              window->input_device->mb_released_event);
+        }
         break;
     }
     }

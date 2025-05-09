@@ -4,32 +4,33 @@
 #define UTIL_IMP
 #include "utils.h"
 
-static const char *base_vert_sh = "#version 330 core"
-                                  "layout(location = 0) in vec3 aPos;"
-                                  "layout(location = 1) in vec4 aCol;"
-                                  "layout(location = 2) in vec2 aUv;"
-                                  "layout(location = 3) in vec3 aNorm;"
-                                  "out vec2 vUV;"
-                                  "out vec4 col;"
-                                  "void main()"
-                                  "{"
-                                  "gl_Position = vec4(aPos, 1.0);"
-                                  "col = aCol;"
-                                  "}";
+static const char *base_vert_sh = "#version 330 core\n"
+                                  "layout(location = 0) in vec3 aPos;\n"
+                                  "layout(location = 1) in vec4 aCol;\n"
+                                  "layout(location = 2) in vec2 aUv;\n"
+                                  "layout(location = 3) in vec3 aNorm;\n"
+                                  "out vec2 vUV;\n"
+                                  "out vec4 col;\n"
+                                  "void main()\n"
+                                  "{\n"
+                                  "gl_Position = vec4(aPos, 1.0);\n"
+                                  "col = aCol;\n"
+                                  "}\n";
 
-static const char *base_frag_sh = "#version 330 core"
-                                  "in vec2 vUv;"
-                                  "in vec4 col;"
-                                  "out vec4 FragColor;"
-                                  "void main()"
-                                  "{"
-                                  "FragColor = col;"
-                                  "}";
+static const char *base_frag_sh = "#version 330 core\n"
+                                  "in vec2 vUv;\n"
+                                  "in vec4 col;\n"
+                                  "out vec4 FragColor;\n"
+                                  "void main()\n"
+                                  "{\n"
+                                  "FragColor = col;\n"
+                                  "}\n";
 
 uint8_t shader_compile(uint32_t shader, int32_t type)
 {
     int32_t success;
     char log[512] = {'n', 'o', ' ', 'e', 'r', 'r', 'o', 'r', '\n'};
+    glCompileShader(shader);
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
 
     if (!success)

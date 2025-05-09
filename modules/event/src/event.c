@@ -20,6 +20,7 @@ uint8_t event_create(uint8_t type, event **result)
     IS_NULL(_result, EVENT_ERR_ALLOC, "EVENT");
 
     _result->type = type;
+    _result->data = NULL;
 
     *result = _result;
     return exit_code;
@@ -32,7 +33,6 @@ uint8_t event_load(event *event, void *data)
 {
     uint8_t exit_code = EVENT_NO_ERR;
 
-    INFO("[EVENT] loading event with data");
     IS_NULL(data, EVENT_ERR_INVALARG, "EVENT");
     IS_NULL(event, EVENT_ERR_INVALARG, "EVENT");
 
@@ -108,8 +108,6 @@ uint8_t event_system_fire(event_system *event_sys, event *event)
 {
     uint8_t exit_code = EVENT_NO_ERR;
     
-    INFO("[EVENT] firing event to event_system");
-    
     IS_NULL(event_sys, EVENT_ERR_INVALARG, "EVENT");
     IS_NULL(event, EVENT_ERR_INVALARG, "EVENT");
     IS_NULL(event->data, EVENT_ERR_INVALARG, "EVENT");
@@ -132,8 +130,8 @@ uint8_t event_system_destroy(event_system *event_sys)
     INFO("[EVENT] destroying event_system");
     IS_NULL(event_sys, EVENT_ERR_INVALARG, "EVENT");
 
-    free(event_sys->listeners);
-    free(event_sys);
+    FREE(event_sys->listeners, free);
+    FREE(event_sys, free);
 
     return exit_code;
 
@@ -148,8 +146,7 @@ uint8_t event_destroy(event *event)
     INFO("[EVENT] destroying event");
     IS_NULL(event, EVENT_ERR_INVALARG, "EVENT");
 
-    FREE(event->data, free);
-    free(event);
+    FREE(event, free);
 
     return exit_code;
 

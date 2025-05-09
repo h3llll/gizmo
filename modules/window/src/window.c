@@ -257,7 +257,7 @@ uint8_t window_destroy(window *win)
 
     glfwDestroyWindow(win->data);
     input_device_destroy(win->input_device);
-    free(win);
+    FREE(win, free);
 
     return exit_code;
 
@@ -425,7 +425,7 @@ uint8_t input_device_destroy(input_device *dev)
     key_info_destroy(dev->keyinfo);
     mb_info_destroy(dev->mbinfo);
     mp_info_destroy(dev->mpinfo);
-    free(dev);
+    FREE(dev, free);
 
     return exit_code;
 
@@ -459,7 +459,7 @@ uint8_t key_info_destroy(key_info *keyinfo)
     uint8_t exit_code = WIN_NO_ERR;
 
     IS_NULL(keyinfo, WIN_ERR_INVALARG, "WINDOW");
-    free(keyinfo);
+    FREE(keyinfo, free);
 
     return exit_code;
 
@@ -492,7 +492,7 @@ uint8_t mb_info_destroy(mb_info *mbinfo)
     uint8_t exit_code = WIN_NO_ERR;
 
     IS_NULL(mbinfo, WIN_ERR_INVALARG, "WINDOW");
-    free(mbinfo);
+    FREE(mbinfo, free);
 
     return exit_code;
 
@@ -525,7 +525,7 @@ uint8_t mp_info_destroy(mp_info *mpinfo)
     uint8_t exit_code = WIN_NO_ERR;
 
     IS_NULL(mpinfo, WIN_ERR_INVALARG, "WINDOW");
-    free(mpinfo);
+    FREE(mpinfo, free);
 
     return exit_code;
 cleanup:

@@ -32,12 +32,10 @@ int main(void)
 
     renderer *renderer;
     renderer_create(&renderer, "", "");
-    renderer_colorf(renderer, 1.0f, 1.0f, 1.0f, 1.0f);
+    renderer_colorf(renderer, 0.5f, 0.5f, 0.5f, 1.0f);
 
     event_system_register(window->input_device->event_sys, key_cb);
 
-    ERR("haha error");
-    WARN("warn");
     while (!window_closing(window))
     {
         window_poll_events();

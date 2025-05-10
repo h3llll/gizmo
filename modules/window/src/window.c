@@ -17,6 +17,9 @@ void glfw_err_callback(int err, const char *desc)
 
 void window_size_callback(GLFWwindow *glfw_win, int width, int height)
 {
+    window *window = glfwGetWindowUserPointer(glfw_win);
+    window->width = width;
+    window->height = height;
     INFO("[WINDOW] %p window size changed: x: %d, y: %d\n", glfw_win,
          width, height);
 }
@@ -135,18 +138,13 @@ void window_mp_callback(GLFWwindow *glfw_win, double x, double y)
                       window->input_device->mouse_motion_event);
 }
 
-uint8_t window_set_fb_callback(window *window, win_framebuffersizefun func)
+void window_fb_callback(GLFWwindow *glfw_win, int width, int height)
 {
-    uint8_t exit_code = WIN_NO_ERR;
-    INFO("[WINDOW] setting framebuffer size callback");
-    IS_NULL(window, WIN_NO_ERR, "WINDOW");
-    glfwSetFramebufferSizeCallback(window->data, func);
-cleanup:
-{
-    return exit_code;
+    INFO("[WINDOW] resized window");
+    window *window = glfwGetWindowUserPointer(glfw_win);
+    window->width = width;
+    window->height = height;
 }
-}
-
 // window_
 uint8_t window_module_init(void)
 {
@@ -180,8 +178,9 @@ uint8_t window_create(int32_t width, int32_t height, const char *title,
     glfwWindowHint(GLFW_FOCUSED, GLFW_TRUE);
     glfwWindowHint(GLFW_FLOATING, GLFW_TRUE);
     glfwWindowHint(GLFW_FOCUS_ON_SHOW, GLFW_TRUE);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3); // gl 3.3
+    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 
     // Window creation
     windata = glfwCreateWindow(width, height, title, NULL, NULL);
@@ -194,7 +193,7 @@ uint8_t window_create(int32_t width, int32_t height, const char *title,
     glfwSetKeyCallback(windata, window_key_callback);
     glfwSetMouseButtonCallback(windata, window_mb_callback);
     glfwSetCursorPosCallback(windata, window_mp_callback);
-
+    glfwSetFramebufferSizeCallback(windata, window_fb_callback);
     // Returning the handle
     _result = malloc(sizeof(window));
     IS_NULL(_result, WIN_ERR_ALLOC, "WINDOW");
@@ -204,6 +203,8 @@ uint8_t window_create(int32_t width, int32_t height, const char *title,
 
     _result->input_device = input_dev;
     _result->data = windata;
+    _result->width = width;
+    _result->height = height;
 
     *result = _result;
 

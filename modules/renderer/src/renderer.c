@@ -7,6 +7,27 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+void APIENTRY gl_err_callback(GLenum source, GLenum type, GLuint id,
+                              GLenum severity, GLsizei length,
+                              const GLchar *message,
+                              const void *user_param)
+{
+    switch (severity)
+    {
+    case GL_DEBUG_SEVERITY_HIGH:
+        ERR("[GL] %s", message);
+        break;
+
+    case GL_DEBUG_SEVERITY_MEDIUM:
+        WARN("[GL] %s", message);
+        break;
+
+    default:
+        INFO("[GL] %s", message);
+        break;
+    }
+}
+
 uint8_t renderer_module_init(void *(*get_proc_address_func)(const char *))
 {
     uint8_t exit_code = RENDERER_NO_ERR;
@@ -25,6 +46,10 @@ uint8_t renderer_module_init(void *(*get_proc_address_func)(const char *))
     {
         ERR("[RENDERER] failed to retrieve gl version");
     }
+
+    glEnable(GL_DEBUG_OUTPUT);
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    glDebugMessageCallback(gl_err_callback, NULL);
 
     return exit_code;
 
@@ -59,6 +84,9 @@ static uint8_t setup_gl(renderer *r, const char *vert_path,
     }
     shader_use(shader);
 
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, MAX_FRAME_FLOATS * sizeof(float), NULL,
@@ -70,15 +98,12 @@ static uint8_t setup_gl(renderer *r, const char *vert_path,
                  MAX_FRAME_INDICES * sizeof(uint32_t), NULL,
                  GL_STREAM_DRAW);
 
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
-
     // vec3 pos = (x, y, z)
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex),
                           (void *)0);
     glEnableVertexAttribArray(0);
 
-    // vec4 col = (r, g, b)
+    // vec4 col = (r, g, b, a)
     glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(vertex),
                           (void *)offsetof(vertex, r));
     glEnableVertexAttribArray(1);
@@ -96,6 +121,7 @@ static uint8_t setup_gl(renderer *r, const char *vert_path,
     r->VAO = VAO;
     r->VBO = VBO;
     r->EBO = EBO;
+
     r->shader = shader;
 
 cleanup:
@@ -112,11 +138,11 @@ static uint8_t setup_arr(renderer *r)
     IS_NULL(r, RENDERER_ERR_INVALARG, "RENDERER(INTERNAL)");
 
     RET_ON_FAIL(
-        array_create(&vert_arr, MAX_FRAME_VERTICES * 0.1, sizeof(vertex)),
+        array_create(&vert_arr, MAX_FRAME_VERTICES * 0.5, sizeof(vertex)),
         ARR_ERR_ALLOC, RENDERER_ERR_ALLOC, "RENDERER");
 
     RET_ON_FAIL(
-        array_create(&ind_arr, MAX_FRAME_INDICES * 0.1, sizeof(uint32_t)),
+        array_create(&ind_arr, MAX_FRAME_INDICES * 0.5, sizeof(uint32_t)),
         ARR_ERR_ALLOC, RENDERER_ERR_ALLOC, "RENDERER");
 
     r->vertex_array = vert_arr;
@@ -168,7 +194,6 @@ uint8_t renderer_colorf(renderer *renderer, float r, float g, float b,
                         float a)
 {
     uint8_t exit_code = RENDERER_NO_ERR;
-    INFO("[RENDERER] setting renderer color from float");
 
     IS_NULL(renderer, RENDERER_ERR_INVALARG, "RENDERER");
 
@@ -187,7 +212,6 @@ uint8_t renderer_colori(renderer *renderer, int r, int g, int b, int a)
 {
     uint8_t exit_code = RENDERER_NO_ERR;
 
-    INFO("[RENDERER] setting renderer color from int");
     IS_NULL(renderer, RENDERER_ERR_INVALARG, "RENDERER");
 
     renderer->col.r = (float)r / 255.0f;
@@ -221,7 +245,7 @@ uint8_t renderer_set_viewport(int32_t x, int32_t y, int32_t width,
 {
     uint8_t exit_code = RENDERER_NO_ERR;
 
-    INFO("[RENDERER] setting viewport");
+    INFO("[RENDERER] setting viewport, w:%d, h:%d", width, height);
     glViewport(x, y, width, height);
 
     return exit_code;
@@ -260,21 +284,32 @@ uint8_t renderer_draw_rect(renderer *renderer, int32_t x, int32_t y,
 
     IS_NULL(renderer, RENDERER_ERR_INVALARG, "RENDERER");
 
+    float screen_w = (float)renderer->v_width;
+    float screen_h = (float)renderer->v_height;
+
     float r = renderer->col.r;
     float g = renderer->col.g;
     float b = renderer->col.b;
     float a = renderer->col.a;
 
+    float x0 = TO_NDC_X(x, screen_w);
+    float y0 = TO_NDC_Y(y, screen_h);
+    float x1 = TO_NDC_X(x + width, screen_w);
+    float y1 = TO_NDC_Y(y + height, screen_h);
+
     vertex verts[] = {
-        {x, y, 0, r, g, b, a, 0, 0, 0, 0, 0},
-        {x + width, y, 0, r, g, b, a, 1, 0, 0, 0, 0},
-        {x + width, y + height, 0, r, g, b, a, 1, 1, 0, 0, 0},
-        {x, y + height, 0, r, g, b, a, 0, 1, 0, 0, 0}};
+        {x0, y0, 0, r, g, b, a, 0, 0, 0, 0, 0},
+        {x1, y0, 0, r, g, b, a, 0, 0, 0, 0, 0},
+        {x1, y1, 0, r, g, b, a, 0, 0, 0, 0, 0},
+        {x0, y1, 0, r, g, b, a, 0, 0, 0, 0, 0},
+    };
 
     uint32_t inds[] = {0, 1, 2, 2, 3, 0};
 
     for (size_t i = 0; i < 4; i++)
+    {
         array_put(renderer->vertex_array, &verts[i], sizeof(vertex));
+    }
 
     size_t base_index = renderer->vertex_array->count - 4;
 
@@ -297,9 +332,9 @@ uint8_t renderer_draw_begin(renderer *renderer)
     array_reset(renderer->vertex_array);
     array_reset(renderer->index_array);
 
+    glBindVertexArray(renderer->VAO);
     glBindBuffer(GL_ARRAY_BUFFER, renderer->VBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderer->EBO);
-    glBindVertexArray(renderer->VAO);
 
 cleanup:
     return exit_code;
@@ -309,6 +344,8 @@ uint8_t renderer_draw_end(renderer *renderer)
 {
     uint8_t exit_code = RENDERER_NO_ERR;
     IS_NULL(renderer, RENDERER_ERR_INVALARG, "RENDERER");
+    IS_NULL(renderer->vertex_array, RENDERER_ERR_INVALARG, "RENDERER");
+    IS_NULL(renderer->index_array, RENDERER_ERR_INVALARG, "RENDERER");
 
     glBufferSubData(GL_ARRAY_BUFFER, 0,
                     renderer->vertex_array->count *
@@ -320,6 +357,8 @@ uint8_t renderer_draw_end(renderer *renderer)
                         renderer->index_array->item_size,
                     renderer->index_array->items);
 
+    shader_use(renderer->shader);
+    glFinish();
     glDrawElements(GL_TRIANGLES, renderer->index_array->count,
                    GL_UNSIGNED_INT, (void *)0);
 

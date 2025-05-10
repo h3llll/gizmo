@@ -52,6 +52,8 @@ typedef struct window
 {
     GLFWwindow *data;
     input_device *input_device;
+    int32_t width, height;
+
 } window;
 
 typedef GLFWframebuffersizefun win_framebuffersizefun;
@@ -105,13 +107,6 @@ uint8_t window_module_deinit(void);
  * Returns procedure address from procedure name
  */
 const void *window_get_proc(const char *proc_name);
-
-/**
- * Sets given function as framebuffer size callback
- * Returns WIN_NO_ERR on success.
- */
-uint8_t window_set_fb_callback(window *window,
-                               win_framebuffersizefun func);
 
 /**
  * Checks if target key is pressed, returns true if it is, false otherwise.

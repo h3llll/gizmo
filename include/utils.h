@@ -42,7 +42,7 @@
 #if ACTIVE_LOG_LEVEL >= LOG_LEVEL_ERR
 #define ERR(fmt, ...)                                                     \
     fprintf(stderr,                                                       \
-            ANSI_RED "[ERR]  " fmt                                        \
+            ANSI_RED "[ERR] " fmt                                        \
                      " (file: %s, func: %s, line: %d)\n" ANSI_RESET,      \
             ##__VA_ARGS__, __FILE__, __func__, __LINE__)
 #else

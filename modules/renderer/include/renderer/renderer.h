@@ -13,6 +13,12 @@
 #define MAX_FRAME_FLOATS    (FLOATS_PER_VERTEX * MAX_FRAME_VERTICES)
 #define MAX_FRAME_INDICES  (MAX_FRAME_VERTICES * 3)
 
+#define TO_NDC_X(px, screen_w)\
+    (((float)(px) / screen_w) * 2.0f - 1.0f)
+
+#define TO_NDC_Y(py, screen_h)\
+    (1.0f - ((float)(py) / screen_h) * 2.0f)
+
 // clang-format on
 
 #include "shader.h"
@@ -48,9 +54,9 @@ typedef struct renderer
     shader *shader;
     colorf col;
     uint32_t VAO, VBO, EBO;
+    int32_t v_width, v_height;
 
 } renderer;
-
 /**
  * Initializes gl loader with the procedure address getter argument.
  * Returns RENDERER_NO_ERR on success, 0< on failure.
@@ -96,11 +102,25 @@ uint8_t renderer_colorf(renderer *renderer, float r, float g, float b,
 uint8_t renderer_clear(renderer *renderer);
 
 /**
- * Sets renderer viewport
- * Returns RENDERER_NO_ERR on success
+ * Sets renderer viewport.
+ * Returns RENDERER_NO_ERR on success.
  */
 uint8_t renderer_set_viewport(int32_t x, int32_t y, int32_t width,
                               int32_t height);
+
+// Binds GPU buffers and objects and resets vertex/index arrays.
+// Returns RENDERER_NO_ERR on success, 0< otherwise.
+uint8_t renderer_draw_begin(renderer *renderer);
+
+// Puts rectangle shaped vertices in target renderer's vertex/index array
+// Returns RENDERER_NO_ERR on success, 0< otherwise.
+uint8_t renderer_draw_rect(renderer *renderer, int32_t x, int32_t y,
+                           uint32_t width, uint32_t height);
+
+// Resets GPU buffers and objects after buffering vertex/index array
+// contents to the GPU via said buffers then drawing.
+// Returns RENDERER_NO_ERR on success, 0< otherwise.
+uint8_t renderer_draw_end(renderer *renderer);
 
 /**
  * Frees the renderer's memory.

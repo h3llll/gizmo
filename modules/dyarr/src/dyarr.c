@@ -62,6 +62,7 @@ uint8_t array_destroy(array *arr)
     uint8_t exit_code = ARR_NO_ERR;
 
     IS_NULL(arr, ARR_ERR_INVALARG, "DYARR");
+    IS_NULL(arr->items, ARR_ERR_INVALARG, "DYARR");
 
     FREE(arr->items, free);
     FREE(arr, free);

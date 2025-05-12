@@ -36,6 +36,12 @@ Audio module -> (WIP)
     - Basic music playing shit (play a wav file) -> (On it rn)
         - Load WAV files (On it rn)
         - Play basic audio (WIP)
+
+    - Event integration (everything should have an event_system,
+        and when a sound does a specific action it fires the 
+        corresponding event, like if the sound just started playing
+        it will fire event_system with an event
+        that event->type == AUDEVENT_SOUND_PLAYED or something)
         
     - 3D stuff (no plans cause idk nothing bout it) -> (WIP)
 

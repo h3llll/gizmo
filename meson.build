@@ -21,11 +21,13 @@ subdir('modules/event')
 subdir('modules/dyarr')
 subdir('modules/renderer')
 subdir('modules/window')
+subdir('modules/audio')
 
 renderer_dep = dependency('renderer')
 window_dep = dependency('window')
 event_dep = dependency('event')
 dyarr_dep = dependency('dyarr')
+audio_dep = dependency('audio')
 
 src_files = run_command(
   list_script,
@@ -41,6 +43,7 @@ executable(
     window_dep,
     event_dep,
     dyarr_dep,
+    audio_dep,
   ],
   include_directories: [
     inc_root,

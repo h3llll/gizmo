@@ -105,9 +105,9 @@ uint8_t renderer_clear(renderer *renderer);
  * Sets renderer viewport.
  * Returns RENDERER_NO_ERR on success.
  */
-uint8_t renderer_set_viewport(int32_t x, int32_t y, int32_t width,
-                              int32_t height);
-
+uint8_t renderer_set_viewport(renderer *renderer, int32_t x, int32_t y,
+                              int32_t width, int32_t height);
+    
 // Binds GPU buffers and objects and resets vertex/index arrays.
 // Returns RENDERER_NO_ERR on success, 0< otherwise.
 uint8_t renderer_draw_begin(renderer *renderer);

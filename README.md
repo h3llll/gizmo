@@ -19,21 +19,26 @@ Window module -> (Done)
 
 Renderer module -> (WIP)
 
-    - Basic pipeline -> (WIP)
+    - Basic pipeline -> (Done)
 
     - 2D -> (WIP)
-        - Simple shape rendering -> (WIP)
+        - Simple shape rendering -> (Done)(hahghgaha funny regtancle)
         - Textures -> (WIP)
 
-Memory arena module -> (Done)
+    3D -> (WIP)
 
-3D -> (WIP)
+        - Simple shape rendering -> (WIP)
+        - Mesh loading -> (WIP)
+        - Textures -> (WIP)
 
-    - Simple shape rendering -> (WIP)
-    - Mesh loading -> (WIP)
-    - Textures -> (WIP)
+Audio module -> (WIP)
 
-Audio module -> (WIP) (no plans yet)
+    - Basic music playing shit (play a wav file) -> (On it rn)
+        - Load WAV files (On it rn)
+        - Play basic audio (WIP)
+        
+    - 3D stuff (no plans cause idk nothing bout it) -> (WIP)
+
 
 ECS module -> (WIP) (no plans yet)
 

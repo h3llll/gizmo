@@ -135,7 +135,7 @@ static uint8_t setup_arr(renderer *r)
     array *vert_arr = NULL;
     array *ind_arr = NULL;
 
-    IS_NULL(r, RENDERER_ERR_INVALARG, "RENDERER(INTERNAL)");
+    IS_NULL(r, RENDERER_ERR_INVALARG, "RENDERER->INTERNAL");
 
     RET_ON_FAIL(
         array_create(&vert_arr, MAX_FRAME_VERTICES * 0.5, sizeof(vertex)),
@@ -240,12 +240,14 @@ cleanup:
     return exit_code;
 }
 
-uint8_t renderer_set_viewport(int32_t x, int32_t y, int32_t width,
-                              int32_t height)
+uint8_t renderer_set_viewport(renderer *renderer, int32_t x, int32_t y,
+                              int32_t width, int32_t height)
 {
     uint8_t exit_code = RENDERER_NO_ERR;
 
     INFO("[RENDERER] setting viewport, w:%d, h:%d", width, height);
+    renderer->v_width = width;
+    renderer->v_height = height;
     glViewport(x, y, width, height);
 
     return exit_code;
@@ -346,6 +348,11 @@ uint8_t renderer_draw_end(renderer *renderer)
     IS_NULL(renderer, RENDERER_ERR_INVALARG, "RENDERER");
     IS_NULL(renderer->vertex_array, RENDERER_ERR_INVALARG, "RENDERER");
     IS_NULL(renderer->index_array, RENDERER_ERR_INVALARG, "RENDERER");
+
+    for (size_t i = 0; i < renderer->vertex_array->count; i++)
+    {
+        vertex v = array_get(renderer->vertex_array, vertex, i);
+    }
 
     glBufferSubData(GL_ARRAY_BUFFER, 0,
                     renderer->vertex_array->count *

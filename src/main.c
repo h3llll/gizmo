@@ -1,6 +1,5 @@
 #include "renderer/renderer.h"
 #include "window/window.h"
-#include <stdio.h>
 
 int main(void)
 {
@@ -13,18 +12,21 @@ int main(void)
 
     renderer *renderer;
     renderer_create(&renderer, "", "");
-    
+    int32_t x = 1;    
     while (!window_closing(window))
     {
-        renderer_set_viewport(0, 0, window->width, window->height);
+        renderer_set_viewport(renderer, 0, 0, window->width, window->height);
         window_poll_events();
+        x++;
+
         renderer_draw_begin(renderer);
         {
             renderer_colorf(renderer, 0.5f, 0.5f, 0.5f, 1.0f);
             renderer_clear(renderer);
 
             renderer_colorf(renderer, 1, 1, 1, 1);
-            renderer_draw_rect(renderer, 20, 20, 40, 40);
+            renderer_draw_rect(renderer, x, 20, 40, 40);
+
         }
         renderer_draw_end(renderer);
         window_swap_buffers(window);

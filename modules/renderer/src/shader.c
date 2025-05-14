@@ -12,7 +12,9 @@ static const char *base_vert_sh = "#version 330 core\n"
                                   "out vec2 vUV;\n"
                                   "out vec4 col;\n"
                                   "void main()\n"
-                                  "{\n"
+                                  "{\n" // MAKE UNIFORM AND MAKE SHADER 
+                                        // DO THE NDC TO PIXEL THINGY
+                                        // !!!!!!!!!!!!!!!!!!!!!
                                   "gl_Position = vec4(aPos, 1.0);\n"
                                   "col = aCol;\n"
                                   "}\n";

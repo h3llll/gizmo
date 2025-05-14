@@ -46,6 +46,13 @@ typedef struct vertex
     float nx, ny, nz; // norm
 } vertex;
 
+// Holds position and other information for the viewport
+typedef struct camera
+{
+
+} camera;
+
+
 // Holds renderer information such as color and buffer objects.
 typedef struct renderer
 {

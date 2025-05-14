@@ -19,14 +19,17 @@ inc_root = include_directories('include')
 
 subdir('modules/event')
 subdir('modules/dyarr')
+
 subdir('modules/renderer')
 subdir('modules/window')
 subdir('modules/audio')
 
-renderer_dep = dependency('renderer')
-window_dep = dependency('window')
+
 event_dep = dependency('event')
 dyarr_dep = dependency('dyarr')
+
+renderer_dep = dependency('renderer')
+window_dep = dependency('window')
 audio_dep = dependency('audio')
 
 src_files = run_command(

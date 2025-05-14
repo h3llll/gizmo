@@ -48,6 +48,6 @@ Audio module -> (WIP)
 
 ECS module -> (WIP) (no plans yet)
 
-UI -> (WIP) (no plans yet) 
+UI -> (no ui, build it yourself, maximum customizability) 
 
 for contribution, read docs/STYLE or something idk but it's def in docs

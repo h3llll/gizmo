@@ -286,18 +286,15 @@ uint8_t renderer_draw_rect(renderer *renderer, int32_t x, int32_t y,
 
     IS_NULL(renderer, RENDERER_ERR_INVALARG, "RENDERER");
 
-    float screen_w = (float)renderer->v_width;
-    float screen_h = (float)renderer->v_height;
-
     float r = renderer->col.r;
     float g = renderer->col.g;
     float b = renderer->col.b;
     float a = renderer->col.a;
 
-    float x0 = TO_NDC_X(x, screen_w);
-    float y0 = TO_NDC_Y(y, screen_h);
-    float x1 = TO_NDC_X(x + width, screen_w);
-    float y1 = TO_NDC_Y(y + height, screen_h);
+    float x0 = x;
+    float y0 = y;
+    float x1 = x + width;
+    float y1 = y + height;
 
     vertex verts[] = {
         {x0, y0, 0, r, g, b, a, 0, 0, 0, 0, 0},

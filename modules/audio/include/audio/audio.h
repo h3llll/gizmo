@@ -11,90 +11,103 @@
 #define AUDIO_ERR_ALLOC     1
 #define AUDIO_ERR_INVALARG  2
 #define AUDIO_ERR_OPENAL    3
+
+#define SOUND_JUSTCREATED   AL_INITIAL
+#define SOUND_PLAYING       AL_PLAYING
+#define SOUND_PAUSED        AL_PAUSED
+#define SOUND_DONE          AL_STOPPED
 // clang-format on
 
-
-// Holds listener position and velocity
-typedef struct camera
-{
-    
-} camera;
-
-// 
+// Per device audio context
 typedef struct audio_state
 {
     ALCdevice *dev;
     ALCcontext *ctx;
-    camera *cam;
 } audio_state;
 
-// Stores sound data and pointers to streams which use such sound.
+// Stores sound data.
 // Can be played via a stream.
 typedef struct sound
 {
+    void *data;
+    int32_t format;
+    uint32_t buffer;
+    size_t size;
+    int32_t freq;
 
 } sound;
 
+typedef uint8_t aud_bool;
+
+// Stores stream settings and sound.
+// fields:
+// current_sound: either holds sound or NULL.
+// state: read-only, will be overwritten and manually editing it is
+// dangerous.
+//
+// looping: set to 1 to loop, 1 is default.
+//
+// gain: multiplier for volume, 1.0f is default.
+//
+// pitch: speed multiplier for playback, 1.0f is default.
 typedef struct stream
 {
+    sound *current_sound;
+    int32_t state; 
+    aud_bool looping;
+    float gain;
+    float pitch;
 
 } stream;
 
-typedef struct channel_settings
-{
-
-} channel_settings;
-
-// Manages streams and sounds
-typedef struct channel
-{
-    sound *sound;
-    array *streams;
-    channel_settings settings;
-
-} channel;
-
-// Initiates an audio state in result pointer.
+// Initiates a heap audio state in result pointer.
 // Returns AUDIO_NO_ERR on success, 0< otherwise.
 uint8_t audio_module_init(audio_state **result);
 
-// Creates a stream in result pointer.
-// Returns AUDIO_NO_ERR on success, 0< otherwise.
-uint8_t stream_create(stream **result);
-
-// Attaches sound to target, attach NULL to unattach current sound,
-// Note that it will result in an error(AUDIO_ERR_UNATTACH_NULL) if you
-// attempted to unattach a target->sound that is already unattached.
-// Returns AUDIO_NO_ERR on success, 0< otherwise.
-uint8_t stream_attach(stream *target, sound *sound);
-
-// Plays attached sound.
-// Returns AUDIO_NO_ERR on success, 0< otherwise.
-uint8_t stream_play(stream *stream);
-
-// Stops sound if playing.
-// Return AUDIO_NO_ERR on success, 0< otherwise.
-uint8_t stream_stop(stream *stream);
-
-// Creates a sound in result pointer.
-// Returns AUDIO_NO_ERR on success, 0< otherwise.
-uint8_t sound_create(sound **result);
-
-// Deattaches sound from all streams.
-// Note that you DON'T have to do that before destroying a sound, it happens
-// automatically.
-// Returns AUDIO_NO_ERR on success, 0< otherwise.
-uint8_t sound_unattach_all(sound *sound);
-
-// Deattaches sound from all streams and frees its data.
-// Returns AUDIO_NO_ERR on success, 0< otherwise.
-uint8_t sound_destroy(sound *sound);
-
-// Frees targetted stream.
+// Frees given stream.
 // Returns AUDIO_NO_ERR on success, 0< otherwise.
 uint8_t stream_destroy(stream *stream);
 
-// Frees targetted audio state.
+// Creates a heap allocated stream object into result pointer.
+// Returns AUDIO_NO_ERR on success, 0< otherwise.
+uint8_t stream_create(stream **result);
+
+// Sets loop to given value.
+// 0(false) to not loop, 1(true) to loop.
+// Returns AUDIO_NO_ERR on success, 0< otherwise.
+uint8_t stream_loop(stream *stream, aud_bool loop);
+
+// Sets gain (audio multiplier) to given gain value.
+// Returns AUDIO_NO_ERR on success, 0< otherwise.
+uint8_t stream_set_gain(stream *stream, float gain);
+
+// Sets pitch (speed multiplier) to given pitch value.
+// Returns AUDIO_NO_ERR on success, 0< otherwise.
+uint8_t stream_set_pitch(stream *stream, float pitch);
+
+// Plays given sound through stream.
+// Returns AUDIO_NO_ERR on success, 0< otherwise.
+uint8_t stream_play(stream *stream, sound *sound);
+
+// Pauses stream if playing, outputs a warning if stream is requesting pause
+// while not playing.
+// Returns AUDIO_NO_ERR on success, 0< otherwise.
+uint8_t stream_pause(stream *stream);
+
+// Stops stream completely.
+// Returns AUDIO_NO_ERR on success, 0< otherwise.
+uint8_t stream_stop(stream *stream);
+
+// Loads given path to file into a sound object in the result pointer
+// if the file had a supported audio format.
+// Returns AUDIO_NO_ERR on success, 0< otherwise.
+uint8_t sound_create(sound **result, const char *path);
+
+// Frees given sound.
+// Returns AUDIO_NO_ERR on success, 0< otherwise.
+uint8_t sound_destroy(sound *sound);
+
+// Frees targeted audio state.
 // Returns AUDIO_NO_ERR on success, 0< otherwise.
 uint8_t audio_module_deinit(audio_state *state);
 

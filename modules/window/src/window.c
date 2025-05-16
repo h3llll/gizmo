@@ -5,10 +5,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-// TODO cleanup goto statements to free if a function failed but after
-// memory allocation, god i forgot that exists
-// aaugudsuaghuaghsagdjsalfsajldaf
-
 // Callback definitions
 void glfw_err_callback(int err, const char *desc)
 {

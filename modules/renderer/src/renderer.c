@@ -15,15 +15,15 @@ void APIENTRY gl_err_callback(GLenum source, GLenum type, GLuint id,
     switch (severity)
     {
     case GL_DEBUG_SEVERITY_HIGH:
-        ERR("[GL] %s", message);
+        ERR("[RENDERER] OPENGL FAILED: %s", message);
         break;
 
     case GL_DEBUG_SEVERITY_MEDIUM:
-        WARN("[GL] %s", message);
+        WARN("[RENDERER] OPENGL FAILED: %s", message);
         break;
 
     default:
-        INFO("[GL] %s", message);
+        INFO("[RENDERER] OPENGL FAILED: %s", message);
         break;
     }
 }
@@ -40,11 +40,11 @@ uint8_t renderer_module_init(void *(*get_proc_address_func)(const char *))
     const char *version = (const char *)glGetString(GL_VERSION);
     if (version)
     {
-        INFO("[RENDERER] version: %s", version);
+        INFO("[RENDERER] OPENGL: version: %s", version);
     }
     else
     {
-        ERR("[RENDERER] failed to retrieve gl version");
+        ERR("[RENDERER] OPENGL FAILED: failed to retrieve gl version");
     }
 
     glEnable(GL_DEBUG_OUTPUT);

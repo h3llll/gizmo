@@ -4,6 +4,14 @@
 #define UTIL_IMP
 #include "utils.h"
 
+// TODO : PUT IN THE VERTEX SHADER !! CRITICAL !!! IMPORTANT !!! CRAZY !!!!!
+// NEEDED !!! NOTE !!!!
+#define TO_NDC_X(px, screen_w)\
+    (((float)(px) / screen_w) * 2.0f - 1.0f)
+
+#define TO_NDC_Y(py, screen_h)\
+    (1.0f - ((float)(py) / screen_h) * 2.0f)
+
 static const char *base_vert_sh = "#version 330 core\n"
                                   "layout(location = 0) in vec3 aPos;\n"
                                   "layout(location = 1) in vec4 aCol;\n"
@@ -15,7 +23,7 @@ static const char *base_vert_sh = "#version 330 core\n"
                                   "{\n" // MAKE UNIFORM AND MAKE SHADER 
                                         // DO THE NDC TO PIXEL THINGY
                                         // !!!!!!!!!!!!!!!!!!!!!
-                                  "gl_Position = vec4(aPos, 1.0);\n"
+                                  "gl_Position = vec4(, 1.0);\n"
                                   "col = aCol;\n"
                                   "}\n";
 

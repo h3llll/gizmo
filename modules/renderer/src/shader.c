@@ -1,31 +1,35 @@
 #include "shader.h"
 #include "glad/glad.h"
+#include "renderer/renderer.h"
 
 #define UTIL_IMP
 #include "utils.h"
 
-// TODO : PUT IN THE VERTEX SHADER !! CRITICAL !!! IMPORTANT !!! CRAZY !!!!!
-// NEEDED !!! NOTE !!!!
-#define TO_NDC_X(px, screen_w)\
-    (((float)(px) / screen_w) * 2.0f - 1.0f)
+// TODO : PUT IN THE VERTEX SHADER !! CRITICAL !!! IMPORTANT !!! CRAZY
+// !!!!! NEEDED !!! NOTE !!!!
+#define TO_NDC_X(px, screen_w) (((float)(px) / screen_w) * 2.0f - 1.0f)
 
-#define TO_NDC_Y(py, screen_h)\
-    (1.0f - ((float)(py) / screen_h) * 2.0f)
+#define TO_NDC_Y(py, screen_h) (1.0f - ((float)(py) / screen_h) * 2.0f)
 
-static const char *base_vert_sh = "#version 330 core\n"
-                                  "layout(location = 0) in vec3 aPos;\n"
-                                  "layout(location = 1) in vec4 aCol;\n"
-                                  "layout(location = 2) in vec2 aUv;\n"
-                                  "layout(location = 3) in vec3 aNorm;\n"
-                                  "out vec2 vUV;\n"
-                                  "out vec4 col;\n"
-                                  "void main()\n"
-                                  "{\n" // MAKE UNIFORM AND MAKE SHADER 
-                                        // DO THE NDC TO PIXEL THINGY
-                                        // !!!!!!!!!!!!!!!!!!!!!
-                                  "gl_Position = vec4(, 1.0);\n"
-                                  "col = aCol;\n"
-                                  "}\n";
+static const char *base_vert_sh =
+    "#version 330 core\n"
+    "layout(location = 0) in vec3 aPos;\n"
+    "layout(location = 1) in vec4 aCol;\n"
+    "layout(location = 2) in vec2 aUv;\n"
+    "layout(location = 3) in vec3 aNorm;\n"
+
+    "out vec2 vUV;\n"
+    "out vec4 col;\n"
+
+    "uniform vec2 viewport;\n"
+
+    "void main()\n"
+    "{\n" 
+    "float ndc_x = (aPos.x / viewport.x) * 2.0 - 1.0;\n"
+    "float ndc_y = 1.0 - (aPos.y / viewport.y) * 2.0;\n"
+    "gl_Position = vec4(ndc_x, ndc_y, aPos.z, 1.0);\n"
+    "col = aCol;\n"
+    "}\n";
 
 static const char *base_frag_sh = "#version 330 core\n"
                                   "in vec2 vUv;\n"
@@ -250,6 +254,28 @@ uint8_t shader_destroy(shader *shader)
 
     return exit_code;
 
+cleanup:
+    return exit_code;
+}
+
+uint8_t shader_uniform_vec2f(shader *shader, const char *name, float x,
+                             float y)
+{
+    int exit_code = RENDERER_NO_ERR;
+    IS_NULL(shader, RENDERER_ERR_INVALARG, "RENDERER");
+    int32_t uniform_loc = glGetUniformLocation(shader->prog, name);
+
+    if (uniform_loc == -1)
+    {
+        ERR("[RENDERER->SHADER] FAILED TO LOCATE VIEWPORT UNIFORM SHADER "
+            "%s",
+            name);
+        exit_code = SHADER_ERR_INTERNAL;
+        goto cleanup;
+    }
+    glUniform2f(uniform_loc, x, y);
+
+    return exit_code;
 cleanup:
     return exit_code;
 }

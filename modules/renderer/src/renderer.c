@@ -23,7 +23,7 @@ void APIENTRY gl_err_callback(GLenum source, GLenum type, GLuint id,
         break;
 
     default:
-        INFO("[RENDERER] OPENGL FAILED: %s", message);
+        INFO("[RENDERER] OPENGL : %s", message);
         break;
     }
 }
@@ -248,6 +248,7 @@ uint8_t renderer_set_viewport(renderer *renderer, int32_t x, int32_t y,
     INFO("[RENDERER] setting viewport, w:%d, h:%d", width, height);
     renderer->v_width = width;
     renderer->v_height = height;
+    shader_uniform_vec2f(renderer->shader, "viewport", width, height);
     glViewport(x, y, width, height);
 
     return exit_code;

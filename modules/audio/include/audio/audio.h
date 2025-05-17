@@ -1,39 +1,31 @@
 #ifndef MODULES_AUDIO_H
 #define MODULES_AUDIO_H
 
-#include <AL/al.h>
-#include <AL/alc.h>
 #include <stddef.h>
 #include <stdint.h>
 
 // clang-format off
-#define AUDIO_NO_ERR                0
-#define AUDIO_ERR_ALLOC             1   
-#define AUDIO_ERR_INVALARG          2
-#define AUDIO_ERR_OPENAL            3
-
-#define SOUND_STATE_JUSTCREATED     AL_INITIAL
-#define SOUND_STATE_PLAYING         AL_PLAYING
-#define SOUND_STATE_PAUSED          AL_PAUSED
-#define SOUND_STATE_DONE            AL_STOPPED
-
-#define SOUND_LOOPING_ENABLED       AL_TRUE 
-#define SOUND_LOOPING_DISABLED      AL_FALSE
+#define AUDIO_NO_ERR                    0
+#define AUDIO_ERR_ALLOC                 1   
+#define AUDIO_ERR_INVALARG              2
+#define AUDIO_ERR_PORTAUDIO             3
 // clang-format on
-
-// Per device audio context data.
-typedef struct audio_state
-{
-    ALCdevice *dev;
-    ALCcontext *ctx;
-} audio_state;
+#define CHECK_PA_ERR(err, msg)                                            \
+    do                                                                    \
+    {                                                                     \
+        if ((err) != paNoError)                                           \
+        {                                                                 \
+            ERR(msg ": %s", Pa_GetErrorText(err));                        \
+            exit_code = AUDIO_ERR_PORTAUDIO;                              \
+            goto cleanup;                                                 \
+        }                                                                 \
+    } while (0)
 
 // Stores sound data.
 // Can be played via a stream.
 typedef struct sound
 {
     void *data;
-    ALenum format;
     uint32_t buffer;
     size_t size;
     int32_t freq;
@@ -55,7 +47,6 @@ typedef uint8_t aud_bool;
 // pitch: speed multiplier for playback, 1.0f is default.
 typedef struct stream
 {
-    sound *current_sound;
     uint32_t id;
     int32_t state;
     aud_bool looping;
@@ -66,11 +57,11 @@ typedef struct stream
 
 // Initiates a heap audio state in result pointer.
 // Returns AUDIO_NO_ERR on success, 0< otherwise.
-uint8_t audio_module_init(audio_state **result);
+uint8_t audio_module_init(void);
 
 // Frees targeted audio state.
 // Returns AUDIO_NO_ERR on success, 0< otherwise.
-uint8_t audio_module_deinit(audio_state *state);
+uint8_t audio_module_deinit(void);
 
 // Creates a heap allocated stream object into result pointer.
 // Returns AUDIO_NO_ERR on success, 0< otherwise.

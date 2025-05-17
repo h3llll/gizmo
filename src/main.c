@@ -14,9 +14,11 @@ int main(void)
     renderer *renderer;
     renderer_create(&renderer, "", "");
     int32_t x = 1;
+    int32_t y = 1;
+
+    renderer_set_viewport(renderer, 0, 0, window->width, window->height);
     while (!window_closing(window))
     {
-        renderer_set_viewport(renderer, 0, 0, window->width, window->height);
         window_poll_events();
         
         if (window_key_pressed(window, KEY_D))
@@ -28,16 +30,23 @@ int main(void)
             x -= 2;
         }
 
+        if (window_key_pressed(window, KEY_W))
+        {
+            y -= 2;
+        }
+        if (window_key_pressed(window, KEY_S))
+        {
+            y += 2;
+        }
+
+
         renderer_draw_begin(renderer);
         {
             renderer_colorf(renderer, 0.5f, 0.5f, 0.5f, 1.0f);
             renderer_clear(renderer);
 
             renderer_colorf(renderer, 0, 0, 0, 1);
-            renderer_draw_rect(renderer, x, 0, 40, 40);
-
-            renderer_draw_rect(renderer, x, 30, 600, 600);
-
+            renderer_draw_rect(renderer, x, y, 40, 40);
         }
         renderer_draw_end(renderer);
         window_swap_buffers(window);

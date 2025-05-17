@@ -31,20 +31,14 @@
 
 #if ACTIVE_LOG_LEVEL >= LOG_LEVEL_WARN
 #define WARN(fmt, ...)                                                    \
-    fprintf(stderr,                                                       \
-            ANSI_YELLOW "[WARN] " fmt                                     \
-                        " (file: %s, func: %s, line: %d)\n" ANSI_RESET,   \
-            ##__VA_ARGS__, __FILE__, __func__, __LINE__)
+    fprintf(stderr, ANSI_YELLOW "[WARN] " fmt ANSI_RESET, ##__VA_ARGS__)
 #else
 #define WARN(fmt, ...)
 #endif // ACTIVE_LOG_LEVEL >= LOG_LEVEL_WARN
 
 #if ACTIVE_LOG_LEVEL >= LOG_LEVEL_ERR
 #define ERR(fmt, ...)                                                     \
-    fprintf(stderr,                                                       \
-            ANSI_RED "[ERR] " fmt                                        \
-                     " (file: %s, func: %s, line: %d)\n" ANSI_RESET,      \
-            ##__VA_ARGS__, __FILE__, __func__, __LINE__)
+    fprintf(stderr, ANSI_RED "[ERR] " fmt ANSI_RESET, ##__VA_ARGS__)
 #else
 #define ERR(fmt, ...)
 #endif // ACTIVE_LOG_LEVEL >= LOG_LEVEL_ERR

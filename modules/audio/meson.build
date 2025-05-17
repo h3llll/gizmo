@@ -7,7 +7,6 @@ src_files = run_command(
   check: true,
 ).stdout().strip().split('\n')
 
-al_dep = dependency('openal')
 event_dep = dependency('event')
 dyarr_dep = dependency('dyarr')
 
@@ -16,7 +15,6 @@ audio_lib = shared_library(
   src_files,
   include_directories: [inc_audio, inc_root],
   dependencies: [
-    al_dep,
     event_dep,
     dyarr_dep,
   ],

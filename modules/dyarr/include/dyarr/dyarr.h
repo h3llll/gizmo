@@ -32,7 +32,7 @@ uint8_t array_create(array **result, size_t cap, size_t item_size);
 
 // Deallocates the array and all items of the array.
 // Returns ARR_NO_ERR on success, 0< otherwise.
-uint8_t array_destroy(array *arr);
+uint8_t array_destroy(array **arr);
 
 // Places given item at the end of the array, stretching the array
 // when needed, while only accepting items of size: array->item_size.

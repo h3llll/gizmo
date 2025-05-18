@@ -23,6 +23,7 @@ renderer_lib = shared_library(
 renderer_dep = declare_dependency(
   include_directories: [inc_renderer],
   link_with: renderer_lib,
+  dependencies: dyarr_dep,
 )
 
 meson.override_dependency('renderer', renderer_dep)

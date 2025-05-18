@@ -1,24 +1,25 @@
 #include "renderer/renderer.h"
+#include "utils.h"
 #include "window/window.h"
 #include "window/keys.h"
 
 int main(void)
 {
     window_module_init();
-    window *window;
+    window_t *window;
     window_create(400, 400, "hi", &window);
 
     // Never initialize renderer module before creating a window
     renderer_module_init((void *)window_get_proc);
 
-    renderer *renderer;
-    renderer_create(&renderer, "", "");
+    renderer_t *renderer;
+    WARN("%d", renderer_create(&renderer, "", ""));
     int32_t x = 1;
     int32_t y = 1;
 
-    renderer_set_viewport(renderer, 0, 0, window->width, window->height);
     while (!window_closing(window))
     {
+        renderer_set_viewport(renderer, 0, 0, window->width, window->height);
         window_poll_events();
         
         if (window_key_pressed(window, KEY_D))
@@ -52,8 +53,8 @@ int main(void)
         window_swap_buffers(window);
     }
 
+    renderer_destroy(renderer);
     window_destroy(window);
     window_module_deinit();
-    renderer_destroy(renderer);
     return 0;
 }

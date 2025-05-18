@@ -3,69 +3,69 @@
 #include <stdlib.h>
 #include <string.h>
 
-uint8_t array_create(array **result, size_t initial_cap, size_t item_size)
+// TODO (most likely) this module causes a nested??(asan says so) segfault
+//
+// I HAVE NO IDEA WHY
+uint8_t array_create(array **result, size_t initial_item_cap,
+                     size_t item_size)
 {
     uint8_t exit_code = ARR_NO_ERR;
     INFO("[DYARR] creating array");
 
     array *_result = NULL;
+    void *items = NULL;
 
     IS_NULL(result, ARR_ERR_INVALARG, "DYARR");
 
-    if (initial_cap > SIZE_MAX / item_size)
-    {
-        ERR("size overflow when calculating array allocation");
-        exit_code = ARR_ERR_ALLOC;
-        goto cleanup;
-    }
-
-    if (initial_cap == 0 || item_size == 0)
+    if (initial_item_cap == 0 || item_size == 0)
     {
         ERR("cannot create 0 sized array, do not pass 0 size arguments.");
         exit_code = ARR_ERR_INVALARG;
         goto cleanup;
     }
 
-    if (initial_cap % item_size != 0)
+    if (initial_item_cap > SIZE_MAX / item_size)
     {
-        WARN("permanently unused memory initializing array at cap(bytes): "
-             "%zu "
-             "wasted memory: %zu,\n please initialize the array with "
-             "initial_cap devisable by item_size"
-             ", also you could have used array_strip but i have no way to "
-             "tell lol",
-             initial_cap * item_size, item_size % initial_cap);
+        ERR("size overflow when calculating array allocation");
+        exit_code = ARR_ERR_ALLOC;
+        goto cleanup;
     }
 
     _result = malloc(sizeof(array));
     IS_NULL(_result, ARR_ERR_ALLOC, "DYARR");
 
-    _result->items = malloc(initial_cap * item_size);
-    IS_NULL(_result->items, ARR_ERR_ALLOC, "DYARR");
+    items = malloc(initial_item_cap * item_size);
+    IS_NULL(items, ARR_ERR_ALLOC, "DYARR");
 
-    _result->cap = initial_cap;
+    _result->items = items;
+    items = NULL;
+
+    _result->cap = initial_item_cap;
     _result->item_size = item_size;
     _result->count = 0;
 
     *result = _result;
     _result = NULL;
 
+    return exit_code;
+
 cleanup:
     FREE(_result, free);
-
+    FREE(items, free);
     return exit_code;
 }
 
-uint8_t array_destroy(array *arr)
+uint8_t array_destroy(array **arr)
 {
     INFO("[DYARR] destroying array");
     uint8_t exit_code = ARR_NO_ERR;
 
     IS_NULL(arr, ARR_ERR_INVALARG, "DYARR");
-    IS_NULL(arr->items, ARR_ERR_INVALARG, "DYARR");
+    IS_NULL(*arr, ARR_ERR_INVALARG, "DYARR");
+    IS_NULL((*arr)->items, ARR_ERR_INVALARG, "DYARR");
 
-    FREE(arr->items, free);
-    FREE(arr, free);
+    FREE((*arr)->items, free);
+    FREE(*arr, free);
 
 cleanup:
     return exit_code;
@@ -163,7 +163,8 @@ uint8_t array_pop(array *arr, size_t count_to_pop)
         goto cleanup;
     }
 
-    if (arr->count <= count_to_pop)
+    if (arr->count < count_to_pop) // TODO im so sleepy but this if pisses
+                                   // me off BADLY. I CANT FIGURE OUT WHY
     {
         ERR("can't free %zu items from array as array only has %zu items",
             count_to_pop, arr->count);
@@ -193,8 +194,7 @@ uint8_t array_strip(array *arr)
     uint8_t exit_code = ARR_NO_ERR;
     IS_NULL(arr, ARR_ERR_INVALARG, "DYARR");
 
-    array *new_arr_items =
-        realloc(arr->items, arr->count * arr->item_size);
+    void *new_arr_items = realloc(arr->items, arr->count * arr->item_size);
     IS_NULL(new_arr_items, ARR_ERR_ALLOC, "DYARR");
     arr->cap = arr->count;
 

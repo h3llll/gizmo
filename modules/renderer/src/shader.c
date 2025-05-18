@@ -24,7 +24,7 @@ static const char *base_vert_sh =
     "uniform vec2 viewport;\n"
 
     "void main()\n"
-    "{\n" 
+    "{\n"
     "float ndc_x = (aPos.x / viewport.x) * 2.0 - 1.0;\n"
     "float ndc_y = 1.0 - (aPos.y / viewport.y) * 2.0;\n"
     "gl_Position = vec4(ndc_x, ndc_y, aPos.z, 1.0);\n"
@@ -72,13 +72,13 @@ uint8_t shader_compile(uint32_t shader, int32_t type)
 }
 
 uint8_t shader_create(const char *vert_path, const char *frag_path,
-                      shader **result)
+                      shader_t **result)
 {
     uint8_t exit_code = SHADER_NO_ERR;
 
     uint32_t vert_shader = 0, frag_shader = 0, program = 0;
     char *vert_src = NULL, *frag_src = NULL;
-    shader *_result = NULL;
+    shader_t *_result = NULL;
 
     INFO("[RENDERER->SHADER] creating shader");
     IS_NULL(vert_path, SHADER_ERR_INVALARG, "[RENDERER->SHADER]");
@@ -89,7 +89,7 @@ uint8_t shader_create(const char *vert_path, const char *frag_path,
     RET_ON_FAIL(read_file(frag_path, &frag_src), UTIL_ERR_IO,
                 SHADER_ERR_IO, "RENDERER->SHADER");
 
-    _result = malloc(sizeof(shader));
+    _result = malloc(sizeof(shader_t));
     IS_NULL(_result, SHADER_ERR_ALLOC, "RENDERER->SHADER");
 
     vert_shader = glCreateShader(GL_VERTEX_SHADER);
@@ -147,16 +147,16 @@ cleanup:
     return exit_code;
 }
 
-uint8_t shader_create_fallback(shader **result)
+uint8_t shader_create_fallback(shader_t **result)
 {
     uint8_t exit_code = SHADER_NO_ERR;
 
     uint32_t vert_shader = 0, frag_shader = 0, program = 0;
-    shader *_result = NULL;
+    shader_t *_result = NULL;
 
     INFO("[RENDERER->SHADER] creating shader");
 
-    _result = malloc(sizeof(shader));
+    _result = malloc(sizeof(shader_t));
     IS_NULL(_result, SHADER_ERR_ALLOC, "RENDERER->SHADER");
 
     vert_shader = glCreateShader(GL_VERTEX_SHADER);
@@ -211,7 +211,7 @@ cleanup:
     return exit_code;
 }
 
-uint8_t shader_use(shader *shader)
+uint8_t shader_use(shader_t *shader)
 {
     uint8_t exit_code = SHADER_NO_ERR;
     IS_NULL(shader, SHADER_ERR_INVALARG, "RENDERER->SHADER");
@@ -222,7 +222,7 @@ cleanup:
     return exit_code;
 }
 
-uint8_t shader_strip(shader *shader)
+uint8_t shader_strip(shader_t *shader)
 {
     uint8_t exit_code = SHADER_NO_ERR;
     IS_NULL(shader, SHADER_ERR_INVALARG, "RENDERER->SHADER");
@@ -239,18 +239,24 @@ cleanup:
     return exit_code;
 }
 
-uint8_t shader_destroy(shader *shader)
+uint8_t shader_destroy(shader_t **shader)
 {
     uint8_t exit_code = SHADER_NO_ERR;
+
     IS_NULL(shader, SHADER_ERR_INVALARG, "RENDERER->SHADER");
 
-    glDeleteShader(shader->vert);
-    glDeleteShader(shader->frag);
-    glDeleteProgram(shader->prog);
+    shader_t *_shader = *shader;
+    IS_NULL(_shader, SHADER_ERR_INVALARG, "RENDERER->SHADER");
+    
+    glDeleteShader(_shader->vert);
+    glDeleteShader(_shader->frag);
+    glDeleteProgram(_shader->prog);
 
-    shader->vert = 0;
-    shader->frag = 0;
-    shader->prog = 0;
+    _shader->vert = 0;
+    _shader->frag = 0;
+    _shader->prog = 0;
+
+    FREE(*shader, free);
 
     return exit_code;
 
@@ -258,7 +264,7 @@ cleanup:
     return exit_code;
 }
 
-uint8_t shader_uniform_vec2f(shader *shader, const char *name, float x,
+uint8_t shader_uniform_vec2f(shader_t *shader, const char *name, float x,
                              float y)
 {
     int exit_code = RENDERER_NO_ERR;

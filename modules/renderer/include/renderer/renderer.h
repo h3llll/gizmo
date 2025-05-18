@@ -29,14 +29,14 @@
 typedef struct colori
 {
     int8_t r, g, b, a;
-} colori;
+} colori_t;
 
 // Float representation of color, tiny bit faster to use
 // since there's no division needed to transform
 typedef struct colorf
 {
     float r, g, b, a;
-} colorf;
+} colorf_t;
 
 typedef struct vertex
 {
@@ -44,13 +44,13 @@ typedef struct vertex
     float r, g, b, a; // col
     float u, v;       // text
     float nx, ny, nz; // norm
-} vertex;
+} vertex_t;
 
 // Holds position and other information for the viewport
 typedef struct camera
 {
 
-} camera;
+} camera_t;
 
 
 // Holds renderer information such as color and buffer objects.
@@ -58,12 +58,12 @@ typedef struct renderer
 {
     array *vertex_array;
     array *index_array;
-    shader *shader;
-    colorf col;
+    shader_t *shader;
+    colorf_t col;
     uint32_t VAO, VBO, EBO;
     int32_t v_width, v_height;
 
-} renderer;
+} renderer_t;
 /**
  * Initializes gl loader with the procedure address getter argument.
  * Returns RENDERER_NO_ERR on success, 0< on failure.
@@ -86,53 +86,53 @@ uint8_t renderer_module_init(void *(*get_proc_address_func)(const char *));
  * Initializes a renderer to the result pointer.
  * Returns RENDERER_NO_ERR on success, 0< on failure.
  */
-uint8_t renderer_create(renderer **result, const char *vert_path,
+uint8_t renderer_create(renderer_t **result, const char *vert_path,
                         const char *frag_path);
 
 /**
  * Sets the renderer's colors to the specified channel values.
  * Returns RENDERER_NO_ERR on success.
  */
-uint8_t renderer_colori(renderer *renderer, int r, int g, int b, int a);
+uint8_t renderer_colori(renderer_t *renderer, int r, int g, int b, int a);
 
 /**
  * Sets the renderer's colors to the specified channel values.
  * Returns RENDERER_NO_ERR on success.
  */
-uint8_t renderer_colorf(renderer *renderer, float r, float g, float b,
+uint8_t renderer_colorf(renderer_t *renderer, float r, float g, float b,
                         float a);
 
 /**
  * Clears the screen with the renderer's color.
  * Returns RENDERER_NO_ERR on success.
  */
-uint8_t renderer_clear(renderer *renderer);
+uint8_t renderer_clear(renderer_t *renderer);
 
 /**
  * Sets renderer viewport.
  * Returns RENDERER_NO_ERR on success.
  */
-uint8_t renderer_set_viewport(renderer *renderer, int32_t x, int32_t y,
+uint8_t renderer_set_viewport(renderer_t *renderer, int32_t x, int32_t y,
                               int32_t width, int32_t height);
     
 // Binds GPU buffers and objects and resets vertex/index arrays.
 // Returns RENDERER_NO_ERR on success, 0< otherwise.
-uint8_t renderer_draw_begin(renderer *renderer);
+uint8_t renderer_draw_begin(renderer_t *renderer);
 
 // Puts rectangle shaped vertices in target renderer's vertex/index array
 // Returns RENDERER_NO_ERR on success, 0< otherwise.
-uint8_t renderer_draw_rect(renderer *renderer, int32_t x, int32_t y,
+uint8_t renderer_draw_rect(renderer_t *renderer, int32_t x, int32_t y,
                            uint32_t width, uint32_t height);
 
 // Resets GPU buffers and objects after buffering vertex/index array
 // contents to the GPU via said buffers then drawing.
 // Returns RENDERER_NO_ERR on success, 0< otherwise.
-uint8_t renderer_draw_end(renderer *renderer);
+uint8_t renderer_draw_end(renderer_t *renderer);
 
 /**
  * Frees the renderer's memory.
  * Returns RENDERER_NO_ERR on success.
  */
-uint8_t renderer_destroy(renderer *renderer);
+uint8_t renderer_destroy(renderer_t *renderer);
 
 #endif

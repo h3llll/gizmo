@@ -13,7 +13,7 @@ void glfw_err_callback(int err, const char *desc)
 
 void window_size_callback(GLFWwindow *glfw_win, int width, int height)
 {
-    window *window = glfwGetWindowUserPointer(glfw_win);
+    window_t *window = glfwGetWindowUserPointer(glfw_win);
     window->width = width;
     window->height = height;
     INFO("[WINDOW] %p window size changed: x: %d, y: %d\n", glfw_win,
@@ -26,6 +26,7 @@ void window_close_callback(GLFWwindow *glfw_win)
     glfwSetWindowShouldClose(glfw_win, GLFW_TRUE);
 }
 
+// below is unconfirmed, just a 30~% probability
 // NOTE IMPORTANT TODO HELP VERY IMPORTANT DONT FORGET
 //
 // sharing the data pointer (window->input_device->keyinfo)
@@ -48,7 +49,7 @@ void window_close_callback(GLFWwindow *glfw_win)
 void window_key_callback(GLFWwindow *glfw_win, int key, int scancode,
                          int action, int mods)
 {
-    window *window = glfwGetWindowUserPointer(glfw_win);
+    window_t *window = glfwGetWindowUserPointer(glfw_win);
     window->input_device->keyinfo->key = key;
     window->input_device->keyinfo->scancode = scancode;
     window->input_device->keyinfo->mods = mods;
@@ -86,7 +87,7 @@ void window_key_callback(GLFWwindow *glfw_win, int key, int scancode,
 void window_mb_callback(GLFWwindow *glfw_win, int button, int action,
                         int mods)
 {
-    window *window = glfwGetWindowUserPointer(glfw_win);
+    window_t *window = glfwGetWindowUserPointer(glfw_win);
 
     window->input_device->mbinfo->button = button;
     window->input_device->mbinfo->mods = mods;
@@ -122,7 +123,7 @@ void window_mb_callback(GLFWwindow *glfw_win, int button, int action,
 
 void window_mp_callback(GLFWwindow *glfw_win, double x, double y)
 {
-    window *window = glfwGetWindowUserPointer(glfw_win);
+    window_t *window = glfwGetWindowUserPointer(glfw_win);
 
     window->input_device->mpinfo->x = x;
     window->input_device->mpinfo->y = y;
@@ -137,7 +138,7 @@ void window_mp_callback(GLFWwindow *glfw_win, double x, double y)
 void window_fb_callback(GLFWwindow *glfw_win, int width, int height)
 {
     INFO("[WINDOW] resized window");
-    window *window = glfwGetWindowUserPointer(glfw_win);
+    window_t *window = glfwGetWindowUserPointer(glfw_win);
     window->width = width;
     window->height = height;
 }
@@ -157,15 +158,15 @@ uint8_t window_module_init(void)
 }
 
 uint8_t window_create(int32_t width, int32_t height, const char *title,
-                      window **result)
+                      window_t **result)
 {
     uint8_t exit_code = WIN_NO_ERR;
 
     INFO("[WINDOW] creating window");
 
     GLFWwindow *windata = NULL;
-    window *_result = NULL;
-    input_device *input_dev = NULL;
+    window_t *_result = NULL;
+    input_device_t *input_dev = NULL;
 
     *result = NULL;
 
@@ -191,7 +192,7 @@ uint8_t window_create(int32_t width, int32_t height, const char *title,
     glfwSetCursorPosCallback(windata, window_mp_callback);
     glfwSetFramebufferSizeCallback(windata, window_fb_callback);
     // Returning the handle
-    _result = malloc(sizeof(window));
+    _result = malloc(sizeof(window_t));
     IS_NULL(_result, WIN_ERR_ALLOC, "WINDOW");
 
     RET_ON_FAIL(input_device_create(&input_dev), WIN_ERR_ALLOC,
@@ -217,7 +218,7 @@ cleanup:
 }
 }
 
-uint8_t window_closing(window *win)
+uint8_t window_closing(window_t *win)
 {
     uint8_t exit_code = WIN_NO_ERR;
     IS_NULL(win, WIN_ERR_INVALARG, "WINDOW");
@@ -227,7 +228,7 @@ cleanup:
     return exit_code;
 }
 
-uint8_t window_swap_buffers(window *win)
+uint8_t window_swap_buffers(window_t *win)
 {
     uint8_t exit_code = WIN_NO_ERR;
 
@@ -246,7 +247,7 @@ uint8_t window_poll_events(void)
     return WIN_NO_ERR;
 }
 
-uint8_t window_destroy(window *win)
+uint8_t window_destroy(window_t *win)
 {
     uint8_t exit_code = WIN_NO_ERR;
 
@@ -274,7 +275,7 @@ const void *window_get_proc(const char *proc_name)
     return glfwGetProcAddress(proc_name);
 }
 
-uint8_t window_key_pressed(window *window, int key)
+uint8_t window_key_pressed(window_t *window, int key)
 {
     uint8_t exit_code = WIN_NO_ERR;
 
@@ -285,7 +286,7 @@ cleanup:
     return exit_code;
 }
 
-uint8_t window_key_repeated(window *window, int key)
+uint8_t window_key_repeated(window_t *window, int key)
 {
     uint8_t exit_code = WIN_NO_ERR;
 
@@ -296,7 +297,7 @@ cleanup:
     return exit_code;
 }
 
-uint8_t window_key_released(window *window, int key)
+uint8_t window_key_released(window_t *window, int key)
 {
     uint8_t exit_code = WIN_NO_ERR;
 
@@ -307,7 +308,7 @@ cleanup:
     return exit_code;
 }
 
-uint8_t window_mousebutton_pressed(window *window, int button)
+uint8_t window_mousebutton_pressed(window_t *window, int button)
 {
     uint8_t exit_code = WIN_NO_ERR;
 
@@ -318,7 +319,7 @@ cleanup:
     return exit_code;
 }
 
-uint8_t window_mousebutton_released(window *window, int button)
+uint8_t window_mousebutton_released(window_t *window, int button)
 {
     uint8_t exit_code = WIN_NO_ERR;
 
@@ -329,7 +330,7 @@ cleanup:
     return exit_code;
 }
 
-uint8_t window_get_mouse_pos(window *window, double *x_result,
+uint8_t window_get_mouse_pos(window_t *window, double *x_result,
                              double *y_result)
 {
     uint8_t exit_code = WIN_NO_ERR;
@@ -346,13 +347,13 @@ cleanup:
 }
 
 // input_device_
-uint8_t input_device_create(input_device **result)
+uint8_t input_device_create(input_device_t **result)
 {
     uint8_t exit_code = WIN_NO_ERR;
 
-    input_device *_result = NULL;
+    input_device_t *_result = NULL;
 
-    _result = malloc(sizeof(input_device));
+    _result = malloc(sizeof(input_device_t));
     IS_NULL(_result, WIN_ERR_ALLOC, "WINDOW");
 
     RET_ON_FAIL(event_create(WINEVENT_KEY_DOWN, &_result->key_down_event),
@@ -407,7 +408,7 @@ cleanup:
 }
 }
 
-uint8_t input_device_destroy(input_device *dev)
+uint8_t input_device_destroy(input_device_t *dev)
 {
     uint8_t exit_code = WIN_NO_ERR;
     IS_NULL(dev, WIN_ERR_INVALARG, "WINDOW");
@@ -432,12 +433,12 @@ cleanup:
 
 // key_info_
 uint8_t key_info_create(int32_t key, int32_t scancode, int32_t mods,
-                        key_info **result)
+                        key_info_t **result)
 {
     uint8_t exit_code = WIN_NO_ERR;
     IS_NULL(result, WIN_ERR_INVALARG, "WINDOW");
 
-    key_info *_result = malloc(sizeof(key_info));
+    key_info_t *_result = malloc(sizeof(key_info_t));
     IS_NULL(_result, WIN_ERR_ALLOC, "WINDOW");
 
     _result->key = key;
@@ -451,7 +452,7 @@ cleanup:
     return exit_code;
 }
 
-uint8_t key_info_destroy(key_info *keyinfo)
+uint8_t key_info_destroy(key_info_t *keyinfo)
 {
     uint8_t exit_code = WIN_NO_ERR;
 
@@ -465,13 +466,13 @@ cleanup:
 }
 
 // mb_info_
-uint8_t mb_info_create(int32_t button, int32_t mods, mb_info **result)
+uint8_t mb_info_create(int32_t button, int32_t mods, mb_info_t **result)
 {
     uint8_t exit_code = WIN_NO_ERR;
 
     IS_NULL(result, WIN_ERR_INVALARG, "WINDOW");
 
-    mb_info *_result = malloc(sizeof(mb_info));
+    mb_info_t *_result = malloc(sizeof(mb_info_t));
     IS_NULL(_result, WIN_ERR_ALLOC, "WINDOW");
 
     _result->button = button;
@@ -484,7 +485,7 @@ cleanup:
     return exit_code;
 }
 
-uint8_t mb_info_destroy(mb_info *mbinfo)
+uint8_t mb_info_destroy(mb_info_t *mbinfo)
 {
     uint8_t exit_code = WIN_NO_ERR;
 
@@ -498,13 +499,13 @@ cleanup:
 }
 
 // mp_info_
-uint8_t mp_info_create(double x, double y, mp_info **result)
+uint8_t mp_info_create(double x, double y, mp_info_t **result)
 {
     uint8_t exit_code = WIN_NO_ERR;
 
     IS_NULL(result, WIN_ERR_INVALARG, "WINDOW");
 
-    mp_info *_result = malloc(sizeof(mp_info));
+    mp_info_t *_result = malloc(sizeof(mp_info_t));
     IS_NULL(_result, WIN_ERR_ALLOC, "WINDOW");
 
     _result->x = x;
@@ -517,7 +518,7 @@ cleanup:
     return exit_code;
 }
 
-uint8_t mp_info_destroy(mp_info *mpinfo)
+uint8_t mp_info_destroy(mp_info_t *mpinfo)
 {
     uint8_t exit_code = WIN_NO_ERR;
 

@@ -6,10 +6,11 @@
 
 // clang-format off
 #define AUDIO_NO_ERR                    0
-#define AUDIO_ERR_ALLOC                 1   
+#define AUDIO_ERR_ALLOC                 1
 #define AUDIO_ERR_INVALARG              2
 #define AUDIO_ERR_PORTAUDIO             3
 // clang-format on
+
 #define CHECK_PA_ERR(err, msg)                                            \
     do                                                                    \
     {                                                                     \
@@ -21,6 +22,9 @@
         }                                                                 \
     } while (0)
 
+typedef float float32_t;
+typedef double float64_t;
+
 // Stores sound data.
 // Can be played via a stream.
 typedef struct sound
@@ -30,9 +34,9 @@ typedef struct sound
     size_t size;
     int32_t freq;
 
-} sound;
+} sound_t;
 
-typedef uint8_t aud_bool;
+typedef uint8_t aud_bool_t;
 
 // Stores stream settings and sound.
 // fields:
@@ -49,11 +53,11 @@ typedef struct stream
 {
     uint32_t id;
     int32_t state;
-    aud_bool looping;
+    aud_bool_t looping;
     float gain;
     float pitch;
 
-} stream;
+} stream_t;
 
 // Initiates a heap audio state in result pointer.
 // Returns AUDIO_NO_ERR on success, 0< otherwise.
@@ -65,45 +69,45 @@ uint8_t audio_module_deinit(void);
 
 // Creates a heap allocated stream object into result pointer.
 // Returns AUDIO_NO_ERR on success, 0< otherwise.
-uint8_t stream_create(stream **result);
+uint8_t stream_create(stream_t **result);
 
 // Frees given stream.
 // Returns AUDIO_NO_ERR on success, 0< otherwise.
-uint8_t stream_destroy(stream *st);
+uint8_t stream_destroy(stream_t *st);
 
 // Plays given sound through stream.
 // Returns AUDIO_NO_ERR on success, 0< otherwise.
-uint8_t stream_play(stream *st, sound *sn);
+uint8_t stream_play(stream_t *st, sound_t *sn);
 
 // Pauses stream if playing, outputs a warning if stream is requesting
 // pause while not playing. Returns AUDIO_NO_ERR on success, 0< otherwise.
-uint8_t stream_pause(stream *st);
+uint8_t stream_pause(stream_t *st);
 
 // Stops stream completely.
 // Returns AUDIO_NO_ERR on success, 0< otherwise.
-uint8_t stream_stop(stream *st);
+uint8_t stream_stop(stream_t *st);
 
 // Sets loop to given value.
 // 0(false) to not loop, 1(true) to loop.
 // Returns AUDIO_NO_ERR on success, 0< otherwise.
-uint8_t stream_loop(stream *st, aud_bool loop);
+uint8_t stream_loop(stream_t *st, aud_bool_t loop);
 
 // Sets gain (audio multiplier) to given gain value.
 // Returns AUDIO_NO_ERR on success, 0< otherwise.
-uint8_t stream_set_gain(stream *st, float gain);
+uint8_t stream_set_gain(stream_t *st, float gain);
 
 // Sets pitch (speed multiplier) to given pitch value.
 // Returns AUDIO_NO_ERR on success, 0< otherwise.
-uint8_t stream_set_pitch(stream *st, float pitch);
+uint8_t stream_set_pitch(stream_t *st, float pitch);
 
 // Loads given path to file into a sound object in the result pointer
 // if the file had a supported audio format.
 // Note that the caller gains ownership of the memory and must free it.
 // Returns AUDIO_NO_ERR on success, 0< otherwise.
-uint8_t soud_create(sound **result, const char *path);
+uint8_t soud_create(sound_t **result, const char *path);
 
 // Frees given sound.
 // Returns AUDIO_NO_ERR on success, 0< otherwise.
-uint8_t sound_destroy(sound *sn);
+uint8_t sound_destroy(sound_t *sn);
 
 #endif // MODULES_AUDIO_H

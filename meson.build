@@ -17,17 +17,17 @@ add_global_arguments('-DDEBUG_BUILD', '-DACTIVE_LOG_LEVEL=3', language: 'c')
 list_script = meson.project_source_root() / 'scripts' / 'list-all-src.sh'
 inc_root = include_directories('include')
 
-subdir('modules/event')
 subdir('modules/dyarr')
 
+subdir('modules/event')
 subdir('modules/renderer')
 subdir('modules/window')
 subdir('modules/audio')
 
 
-event_dep = dependency('event')
 dyarr_dep = dependency('dyarr')
 
+event_dep = dependency('event')
 renderer_dep = dependency('renderer')
 window_dep = dependency('window')
 audio_dep = dependency('audio')

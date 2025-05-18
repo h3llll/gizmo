@@ -14,12 +14,14 @@ window_lib = shared_library(
   'window',
   src_files,
   include_directories: [inc_window, inc_root],
-  dependencies: [glfw_dep, event_dep]
+  dependencies: [glfw_dep, event_dep],
 )
 
 window_dep = declare_dependency(
   include_directories: inc_window,
   link_with: window_lib,
+  dependencies: [glfw_dep, event_dep]
+  ,
 )
 
 meson.override_dependency('window', window_dep)

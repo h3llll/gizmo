@@ -57,13 +57,13 @@ cleanup:
     return exit_code;
 }
 
-static uint8_t setup_gl(renderer *r, const char *vert_path,
+static uint8_t setup_gl(renderer_t *r, const char *vert_path,
                         const char *frag_path)
 {
     uint8_t exit_code = RENDERER_NO_ERR;
 
     uint32_t VBO, VAO, EBO;
-    shader *shader = NULL;
+    shader_t *shader = NULL;
 
     // TODO DON'T FUCKING FORGET THIS SHIT NIGGA
     if (vert_path == NULL)
@@ -99,23 +99,23 @@ static uint8_t setup_gl(renderer *r, const char *vert_path,
                  GL_STREAM_DRAW);
 
     // vec3 pos = (x, y, z)
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex),
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex_t),
                           (void *)0);
     glEnableVertexAttribArray(0);
 
     // vec4 col = (r, g, b, a)
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(vertex),
-                          (void *)offsetof(vertex, r));
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(vertex_t),
+                          (void *)offsetof(vertex_t, r));
     glEnableVertexAttribArray(1);
 
     // vec2 textcord = (u, v)
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(vertex),
-                          (void *)offsetof(vertex, u));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(vertex_t),
+                          (void *)offsetof(vertex_t, u));
     glEnableVertexAttribArray(2);
 
     // vec3 norm = (nx, ny, nz)
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(vertex),
-                          (void *)offsetof(vertex, nx));
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(vertex_t),
+                          (void *)offsetof(vertex_t, nx));
     glEnableVertexAttribArray(3);
 
     r->VAO = VAO;
@@ -128,7 +128,7 @@ cleanup:
     return exit_code;
 }
 
-static uint8_t setup_arr(renderer *r)
+static uint8_t setup_arr(renderer_t *r)
 {
     uint8_t exit_code = RENDERER_NO_ERR;
 
@@ -138,7 +138,7 @@ static uint8_t setup_arr(renderer *r)
     IS_NULL(r, RENDERER_ERR_INVALARG, "RENDERER->INTERNAL");
 
     RET_ON_FAIL(
-        array_create(&vert_arr, MAX_FRAME_VERTICES * 0.5, sizeof(vertex)),
+        array_create(&vert_arr, MAX_FRAME_VERTICES * 0.5, sizeof(vertex_t)),
         ARR_ERR_ALLOC, RENDERER_ERR_ALLOC, "RENDERER");
 
     RET_ON_FAIL(
@@ -151,24 +151,25 @@ static uint8_t setup_arr(renderer *r)
     return exit_code;
 
 cleanup:
-    array_destroy(vert_arr);
+    FREE_PTR(vert_arr, array_destroy);
+    FREE_PTR(ind_arr, array_destroy);
     return exit_code;
 }
 
-uint8_t renderer_create(renderer **result, const char *vert_path,
+uint8_t renderer_create(renderer_t **result, const char *vert_path,
                         const char *frag_path)
 {
     uint8_t exit_code = RENDERER_NO_ERR;
 
     INFO("[RENDERER] creating renderer");
-    renderer *_result = NULL;
+    renderer_t *_result = NULL;
 
     IS_NULL(result, RENDERER_ERR_INVALARG, "RENDERER");
 
-    _result = malloc(sizeof(renderer));
+    _result = malloc(sizeof(renderer_t));
     IS_NULL(_result, RENDERER_ERR_ALLOC, "RENDERER");
 
-    _result->col = (colorf){
+    _result->col = (colorf_t){
         .r = 0,
         .g = 0,
         .b = 0,
@@ -186,11 +187,11 @@ uint8_t renderer_create(renderer **result, const char *vert_path,
     return exit_code;
 
 cleanup:
-    renderer_destroy(_result);
+    FREE(_result, renderer_destroy);
     return exit_code;
 }
 
-uint8_t renderer_colorf(renderer *renderer, float r, float g, float b,
+uint8_t renderer_colorf(renderer_t *renderer, float r, float g, float b,
                         float a)
 {
     uint8_t exit_code = RENDERER_NO_ERR;
@@ -208,7 +209,7 @@ cleanup:
     return exit_code;
 }
 
-uint8_t renderer_colori(renderer *renderer, int r, int g, int b, int a)
+uint8_t renderer_colori(renderer_t *renderer, int r, int g, int b, int a)
 {
     uint8_t exit_code = RENDERER_NO_ERR;
 
@@ -225,7 +226,7 @@ cleanup:
     return exit_code;
 }
 
-uint8_t renderer_clear(renderer *renderer)
+uint8_t renderer_clear(renderer_t *renderer)
 {
     uint8_t exit_code = RENDERER_NO_ERR;
 
@@ -240,12 +241,11 @@ cleanup:
     return exit_code;
 }
 
-uint8_t renderer_set_viewport(renderer *renderer, int32_t x, int32_t y,
+uint8_t renderer_set_viewport(renderer_t *renderer, int32_t x, int32_t y,
                               int32_t width, int32_t height)
 {
     uint8_t exit_code = RENDERER_NO_ERR;
 
-    INFO("[RENDERER] setting viewport, w:%d, h:%d", width, height);
     renderer->v_width = width;
     renderer->v_height = height;
     shader_uniform_vec2f(renderer->shader, "viewport", width, height);
@@ -254,17 +254,21 @@ uint8_t renderer_set_viewport(renderer *renderer, int32_t x, int32_t y,
     return exit_code;
 }
 
-uint8_t renderer_destroy(renderer *renderer)
+uint8_t renderer_destroy(renderer_t *renderer)
 {
     uint8_t exit_code = RENDERER_NO_ERR;
 
     IS_NULL(renderer, RENDERER_ERR_INVALARG, "RENDERER");
+    IS_NULL(renderer->index_array, RENDERER_ERR_INVALARG, "RENDERER");
+    IS_NULL(renderer->vertex_array, RENDERER_ERR_INVALARG, "RENDERER");
+
     INFO("[RENDERER] destroying renderer\n");
 
-    FREE(renderer->vertex_array, array_destroy);
-    FREE(renderer->index_array, array_destroy);
-    FREE(renderer->shader, shader_destroy);
+    FREE_PTR(renderer->vertex_array, array_destroy);
+    FREE_PTR(renderer->index_array, array_destroy);
 
+    FREE_PTR(renderer->shader, shader_destroy);
+    
     glDeleteVertexArrays(1, &renderer->VAO);
     glDeleteBuffers(1, &renderer->VBO);
     glDeleteBuffers(1, &renderer->EBO);
@@ -280,7 +284,7 @@ cleanup:
     return exit_code;
 }
 
-uint8_t renderer_draw_rect(renderer *renderer, int32_t x, int32_t y,
+uint8_t renderer_draw_rect(renderer_t *renderer, int32_t x, int32_t y,
                            uint32_t width, uint32_t height)
 {
     uint8_t exit_code = RENDERER_NO_ERR;
@@ -297,7 +301,7 @@ uint8_t renderer_draw_rect(renderer *renderer, int32_t x, int32_t y,
     float x1 = x + width;
     float y1 = y + height;
 
-    vertex verts[] = {
+    vertex_t verts[] = {
         {x0, y0, 0, r, g, b, a, 0, 0, 0, 0, 0},
         {x1, y0, 0, r, g, b, a, 0, 0, 0, 0, 0},
         {x1, y1, 0, r, g, b, a, 0, 0, 0, 0, 0},
@@ -308,7 +312,7 @@ uint8_t renderer_draw_rect(renderer *renderer, int32_t x, int32_t y,
 
     for (size_t i = 0; i < 4; i++)
     {
-        array_put(renderer->vertex_array, &verts[i], sizeof(vertex));
+        array_put(renderer->vertex_array, &verts[i], sizeof(vertex_t));
     }
 
     size_t base_index = renderer->vertex_array->count - 4;
@@ -324,7 +328,7 @@ cleanup:
     return exit_code;
 }
 
-uint8_t renderer_draw_begin(renderer *renderer)
+uint8_t renderer_draw_begin(renderer_t *renderer)
 {
     uint8_t exit_code = RENDERER_NO_ERR;
     IS_NULL(renderer, RENDERER_ERR_INVALARG, "RENDERER");
@@ -340,18 +344,13 @@ cleanup:
     return exit_code;
 }
 
-uint8_t renderer_draw_end(renderer *renderer)
+uint8_t renderer_draw_end(renderer_t *renderer)
 {
     uint8_t exit_code = RENDERER_NO_ERR;
     IS_NULL(renderer, RENDERER_ERR_INVALARG, "RENDERER");
     IS_NULL(renderer->vertex_array, RENDERER_ERR_INVALARG, "RENDERER");
     IS_NULL(renderer->index_array, RENDERER_ERR_INVALARG, "RENDERER");
-
-    for (size_t i = 0; i < renderer->vertex_array->count; i++)
-    {
-        vertex v = array_get(renderer->vertex_array, vertex, i);
-    }
-
+    
     glBufferSubData(GL_ARRAY_BUFFER, 0,
                     renderer->vertex_array->count *
                         renderer->vertex_array->item_size,

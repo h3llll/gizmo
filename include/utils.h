@@ -31,14 +31,15 @@
 
 #if ACTIVE_LOG_LEVEL >= LOG_LEVEL_WARN
 #define WARN(fmt, ...)                                                    \
-    fprintf(stderr, ANSI_YELLOW "[WARN] " fmt ANSI_RESET, ##__VA_ARGS__)
+    fprintf(stderr, ANSI_YELLOW "[WARN] " fmt "\n" ANSI_RESET,            \
+            ##__VA_ARGS__)
 #else
 #define WARN(fmt, ...)
 #endif // ACTIVE_LOG_LEVEL >= LOG_LEVEL_WARN
 
 #if ACTIVE_LOG_LEVEL >= LOG_LEVEL_ERR
 #define ERR(fmt, ...)                                                     \
-    fprintf(stderr, ANSI_RED "[ERR] " fmt ANSI_RESET, ##__VA_ARGS__)
+    fprintf(stderr, ANSI_RED "[ERR] " fmt "\n" ANSI_RESET, ##__VA_ARGS__)
 #else
 #define ERR(fmt, ...)
 #endif // ACTIVE_LOG_LEVEL >= LOG_LEVEL_ERR
@@ -78,6 +79,16 @@
         if (ptr != NULL)                                                  \
         {                                                                 \
             free_fn(ptr);                                                 \
+            ptr = NULL;                                                   \
+        }                                                                 \
+    } while (0)
+
+#define FREE_PTR(ptr, free_fn)                                            \
+    do                                                                    \
+    {                                                                     \
+        if (ptr != NULL)                                                  \
+        {                                                                 \
+            free_fn(&(ptr));                                              \
             ptr = NULL;                                                   \
         }                                                                 \
     } while (0)

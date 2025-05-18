@@ -15,33 +15,33 @@
 typedef struct shader
 {
     uint32_t prog, vert, frag;
-} shader;
+} shader_t;
 
 // Returns a shader heap object through result pointer.
 // Returns SHADER_NO_ERR on success, 0< otherwise.
 uint8_t shader_create(const char *vert_path, const char *frag_path,
-                      shader **result);
+                      shader_t **result);
 
 // Returns a shader heap object through result pointer.
 // though this version uses hardcoded basic fallback shaders.
 // Returns SHADER_NO_ERR on success, 0< otherwise.
-uint8_t shader_create_fallback(shader **result);
+uint8_t shader_create_fallback(shader_t **result);
 
 // Attaches shader program.
 // Returns SHADER_NO_ERR on success, 0< otherwise.
-uint8_t shader_use(shader *shader);
+uint8_t shader_use(shader_t *shader);
 
 // Strips the shaders off of the struct, freeing all shaders.
 // Returns SHADER_NO_ERR on success, 0< otherwise.
-uint8_t shader_strip(shader *shader);
+uint8_t shader_strip(shader_t *shader);
 
 // Uniforms a 2D vector of floats to the shader.
 // Returns SHADER_NO_ERR on success, 0< otherwise.
-uint8_t shader_uniform_vec2f(shader *shader, const char *name, float x,
+uint8_t shader_uniform_vec2f(shader_t *shader, const char *name, float x,
                              float y);
 
 // Deallocates the GPU shaders if they exist and destroys the program.
 // Returns SHADER_NO_ERR on success, 0< otherwise.
-uint8_t shader_destroy(shader *shader);
+uint8_t shader_destroy(shader_t **shader);
 
 #endif // MODULES_RENDERER_SHADER_H

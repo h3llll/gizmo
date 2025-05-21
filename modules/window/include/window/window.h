@@ -12,7 +12,7 @@
 #define WINEVENT_MOUSE_BUTTONDOWN    2
 #define WINEVENT_MOUSE_BUTTONUP      3
 #define WINEVENT_MOUSE_MOTION        4
-// TODO mouse wheel lol #define WINEVENT_MOUSE_WHEEL        5
+#define WINEVENT_MOUSE_SCROLL        5
 // clang-format on
 
 #include "event/event.h"
@@ -37,14 +37,21 @@ typedef struct mp_info
     double x, y;
 } mp_info_t;
 
+typedef struct ms_info
+{
+    double xoffset, yoffset;
+} ms_info_t;
+
 typedef struct input_device
 {
     event_t *key_down_event, *key_released_event;
-    event_t *mouse_motion_event, *mb_down_event, *mb_released_event;
+    event_t *mouse_motion_event, *mb_down_event, *mb_released_event,
+        *mouse_scroll_event;
     event_system_t *event_sys;
     key_info_t *keyinfo;
     mb_info_t *mbinfo;
     mp_info_t *mpinfo;
+    ms_info_t *msinfo;
 
 } input_device_t;
 
@@ -194,5 +201,18 @@ uint8_t mp_info_create(double x, double y, mp_info_t **result);
  * Returns WIN_NO_ERR on success, 0< on failure.
  */
 uint8_t mp_info_destroy(mp_info_t *mpinfo);
+
+// ms_info_
+/**
+ * Creates ms_info heap object.
+ * Returns WIN_NO_ERR on success, 0< on failure.
+ */
+uint8_t ms_info_create(double xoffset, double yoffset, ms_info_t **result);
+
+/**
+ * Creates mp_info heap object.
+ * Returns WIN_NO_ERR on success, 0< on failure.
+ */
+uint8_t ms_info_destroy(ms_info_t *msinfo);
 
 #endif

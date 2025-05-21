@@ -1,7 +1,23 @@
+#include "event/event.h"
 #include "renderer/renderer.h"
 #include "utils.h"
-#include "window/window.h"
 #include "window/keys.h"
+#include "window/window.h"
+
+void ms_cb(event_t *ev)
+{
+    uint8_t type;
+    event_get_type(ev, &type);
+    if (type != WINEVENT_MOUSE_SCROLL)
+        return;
+
+    const ms_info_t *ms_info;
+
+    event_get_data(ev, (const void **)&ms_info);
+
+    printf("mouse scroll: xoff: %f, yoff: %f", ms_info->xoffset,
+           ms_info->yoffset);
+}
 
 int main(void)
 {
@@ -11,6 +27,7 @@ int main(void)
 
     // Never initialize renderer module before creating a window
     renderer_module_init((void *)window_get_proc);
+    event_system_register(window->input_device->event_sys, ms_cb);
 
     renderer_t *renderer;
     WARN("%d", renderer_create(&renderer, "", ""));
@@ -19,9 +36,10 @@ int main(void)
 
     while (!window_closing(window))
     {
-        renderer_set_viewport(renderer, 0, 0, window->width, window->height);
+        renderer_set_viewport(renderer, 0, 0, window->width,
+                              window->height);
         window_poll_events();
-        
+
         if (window_key_pressed(window, KEY_D))
         {
             x += 2;
@@ -39,7 +57,6 @@ int main(void)
         {
             y += 2;
         }
-
 
         renderer_draw_begin(renderer);
         {

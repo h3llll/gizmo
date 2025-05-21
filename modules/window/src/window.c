@@ -135,6 +135,22 @@ void window_mp_callback(GLFWwindow *glfw_win, double x, double y)
                       window->input_device->mouse_motion_event);
 }
 
+void window_ms_callback(GLFWwindow *glfw_win, double xoffset,
+                        double yoffset)
+{
+    printf("scall");
+    window_t *window = glfwGetWindowUserPointer(glfw_win);
+
+    window->input_device->msinfo->xoffset = xoffset;
+    window->input_device->msinfo->yoffset = yoffset;
+
+    event_load(window->input_device->mouse_scroll_event,
+               window->input_device->msinfo);
+
+    event_system_fire(window->input_device->event_sys,
+                      window->input_device->mouse_scroll_event);
+}
+
 void window_fb_callback(GLFWwindow *glfw_win, int width, int height)
 {
     INFO("[WINDOW] resized window");
@@ -375,6 +391,10 @@ uint8_t input_device_create(input_device_t **result)
         event_create(WINEVENT_MOUSE_MOTION, &_result->mouse_motion_event),
         EVENT_ERR_ALLOC, WIN_ERR_ALLOC, "WINDOW");
 
+    RET_ON_FAIL(
+        event_create(WINEVENT_MOUSE_SCROLL, &_result->mouse_scroll_event),
+        EVENT_ERR_ALLOC, WIN_ERR_ALLOC, "WINDOW");
+
     RET_ON_FAIL(event_system_create(&_result->event_sys), EVENT_ERR_ALLOC,
                 WIN_ERR_ALLOC, "WINDOW");
 
@@ -387,6 +407,9 @@ uint8_t input_device_create(input_device_t **result)
     RET_ON_FAIL(mp_info_create(0, 0, &_result->mpinfo), WIN_ERR_ALLOC,
                 WIN_ERR_ALLOC, "WINDOW");
 
+    RET_ON_FAIL(ms_info_create(0, 0, &_result->msinfo), WIN_ERR_ALLOC,
+                WIN_ERR_ALLOC, "WINDOW");
+
     *result = _result;
 
     return exit_code;
@@ -394,14 +417,22 @@ uint8_t input_device_create(input_device_t **result)
 cleanup:
 {
     FREE(_result->mbinfo, mb_info_destroy);
-    FREE(_result->mpinfo, mp_info_destroy);
+
     FREE(_result->keyinfo, key_info_destroy);
+
+    FREE(_result->mpinfo, mp_info_destroy);
+    FREE(_result->msinfo, ms_info_destroy);
+
     FREE(_result->event_sys, event_system_destroy);
+
     FREE(_result->key_down_event, event_destroy);
     FREE(_result->key_released_event, event_destroy);
+
     FREE(_result->mb_down_event, event_destroy);
     FREE(_result->mb_released_event, event_destroy);
+
     FREE(_result->mouse_motion_event, event_destroy);
+    FREE(_result->mouse_scroll_event, event_destroy);
     FREE(_result, free);
 
     return exit_code;
@@ -419,10 +450,12 @@ uint8_t input_device_destroy(input_device_t *dev)
     event_destroy(dev->mb_down_event);
     event_destroy(dev->mb_released_event);
     event_destroy(dev->mouse_motion_event);
+    event_destroy(dev->mouse_scroll_event);
 
     key_info_destroy(dev->keyinfo);
     mb_info_destroy(dev->mbinfo);
     mp_info_destroy(dev->mpinfo);
+    ms_info_destroy(dev->msinfo);
     FREE(dev, free);
 
     return exit_code;
@@ -524,6 +557,38 @@ uint8_t mp_info_destroy(mp_info_t *mpinfo)
 
     IS_NULL(mpinfo, WIN_ERR_INVALARG, "WINDOW");
     FREE(mpinfo, free);
+
+    return exit_code;
+cleanup:
+    return exit_code;
+}
+
+// ms_info_
+uint8_t ms_info_create(double xoffset, double yoffset, ms_info_t **result)
+{
+    uint8_t exit_code = WIN_NO_ERR;
+
+    IS_NULL(result, WIN_ERR_INVALARG, "WINDOW");
+
+    ms_info_t *_result = malloc(sizeof(ms_info_t));
+    IS_NULL(_result, WIN_ERR_ALLOC, "WINDOW");
+
+    _result->xoffset = xoffset;
+    _result->yoffset = yoffset;
+
+    *result = _result;
+    return exit_code;
+
+cleanup:
+    return exit_code;
+}
+
+uint8_t ms_info_destroy(ms_info_t *msinfo)
+{
+    uint8_t exit_code = WIN_NO_ERR;
+
+    IS_NULL(msinfo, WIN_ERR_INVALARG, "WINDOW");
+    FREE(msinfo, free);
 
     return exit_code;
 cleanup:

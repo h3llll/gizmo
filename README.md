@@ -31,6 +31,14 @@ Renderer module -> (WIP)
         - Mesh loading -> (WIP)
         - Textures -> (WIP)
 
+Physics module -> (WIP)
+
+    - Math library -> (WIP)
+        - Vectors -> (WIP)
+        - Matrices -> (WIP)
+
+    - Actual physics -> (WIP)
+
 Audio module -> (WIP)
 
     - Basic music playing shit (play a wav file) -> (On it rn)

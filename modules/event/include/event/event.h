@@ -22,6 +22,10 @@ typedef struct event_system
     array *listeners;
 } event_system_t;
 
+
+// Returns a string representation of given error code.
+char *event_err_str(uint8_t code);
+
 // Creates a heap allocated event object in the result pointer.
 // Returns EVENT_NO_ERR on success, 0< otherwise.
 uint8_t event_create(uint8_t type, event_t **result);
@@ -31,6 +35,16 @@ uint8_t event_create(uint8_t type, event_t **result);
 // it would still have to be freed by the caller.
 // Returns EVENT_NO_ERR on success, 0< otherwise.
 uint8_t event_load(event_t *event, void *data);
+
+// Gets target event's type.
+// Returns EVENT_NO_ERR on success, 0< otherwise.
+uint8_t event_get_type(event_t *event, uint8_t *type);
+
+// Gets the target event's data pointer.
+// Caller of this function shouldn't free or modify this pointer as this is 
+// the event creator's responsibility.
+// Returns EVENT_NO_ERR on success, 0< otherwise.
+uint8_t event_get_data(event_t *event, const void **data);
 
 // Creates a heap allocated event_system object.
 // Returns EVENT_NO_ERR on success, 0< otherwise.

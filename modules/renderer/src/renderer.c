@@ -65,16 +65,6 @@ static uint8_t setup_gl(renderer_t *r, const char *vert_path,
     uint32_t VBO, VAO, EBO;
     shader_t *shader = NULL;
 
-    // TODO DON'T FUCKING FORGET THIS SHIT NIGGA
-    if (vert_path == NULL)
-    {
-        INFO("[RENDERER] no vert_path was given, using builtin(wip)");
-    }
-    if (frag_path == NULL)
-    {
-        INFO("[RENDERER] no frag_path was given, using builtin(wip)");
-    }
-
     if (shader_create(vert_path, frag_path, &shader) > 0)
     {
         WARN("[RENDERER->SHADER] couldn't create shader, using fallback");

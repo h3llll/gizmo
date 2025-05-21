@@ -114,11 +114,18 @@ static inline uint8_t read_file(const char *path, char **result)
     INFO("[UTILS] reading file %s", path);
 
     file = fopen(path, "rb"); // use "rb" for binary compatibility
-    IS_NULL(file, UTIL_ERR_IO, "UTIL");
+    if (file == NULL)
+    {
+        ERR("[UTIL] failed to open file");
+        perror("fopen:");
+        exit_code = UTIL_ERR_IO;
+        goto cleanup;
+    }
 
     if (fseek(file, 0, SEEK_END) != 0)
     {
         ERR("[UTIL] failed to seek to end of file");
+        perror("fseek:");
         exit_code = UTIL_ERR_IO;
         goto cleanup;
     }
@@ -127,6 +134,7 @@ static inline uint8_t read_file(const char *path, char **result)
     if (size < 0)
     {
         ERR("[UTIL] failed to get file size");
+        perror("ftell:");
         exit_code = UTIL_ERR_IO;
         goto cleanup;
     }

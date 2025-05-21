@@ -4,10 +4,25 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-void event_err_str(uint8_t code)
+char *event_err_str(uint8_t code)
 {
-    // TODO: uhh errors n shit turn fucking error codes into fucking
-    // strings or something idk switch statement or something
+    switch (code)
+    {
+        case EVENT_NO_ERR:
+            return "success";
+            break;
+
+        case EVENT_ERR_INVALARG:
+            return "a given pointer argument is NULL.\n";
+            break;
+
+        case EVENT_ERR_ALLOC:
+            return "memory allocation failed";
+            break;
+
+        default:
+            return "unknown error code";
+    }
 }
 
 uint8_t event_create(uint8_t type, event_t **result)
@@ -30,6 +45,21 @@ cleanup:
     return exit_code;
 }
 
+uint8_t event_get_type(event_t *event, uint8_t *type)
+{
+    uint8_t exit_code = EVENT_NO_ERR;
+
+    IS_NULL(event, EVENT_ERR_INVALARG, "EVENT");
+    IS_NULL(type, EVENT_ERR_INVALARG, "EVENT");
+
+    *type = event->type;
+
+    return exit_code;
+
+cleanup:
+    return exit_code;
+}
+
 uint8_t event_load(event_t *event, void *data)
 {
     uint8_t exit_code = EVENT_NO_ERR;
@@ -43,6 +73,22 @@ uint8_t event_load(event_t *event, void *data)
 
 cleanup:
     return exit_code;
+}
+
+uint8_t event_get_data(event_t *event, const void **data)
+{
+    uint8_t exit_code = EVENT_NO_ERR;
+
+    IS_NULL(data, EVENT_ERR_INVALARG, "EVENT");
+    IS_NULL(event, EVENT_ERR_INVALARG, "EVENT");
+
+    data = event->data;
+
+    return exit_code;
+
+cleanup:
+    return exit_code;
+    
 }
 
 uint8_t event_system_create(event_system_t **result)

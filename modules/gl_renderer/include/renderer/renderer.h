@@ -21,7 +21,8 @@
 
 // clang-format on
 
-#include "shader.h"
+#include "libraries.h"
+#include RENDERER_SHADER_INCLUDE
 #include <stdint.h>
 
 // Int representation of color, tiny bit slower to use since it is devided

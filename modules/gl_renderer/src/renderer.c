@@ -1,7 +1,8 @@
-#include "renderer/renderer.h"
+#include "libraries.h"
+#include RENDERER_INCLUDE
+#include GLAD_INCLUDE
 #include "dyarr/dyarr.h"
-#include "glad/glad.h"
-#include "shader.h"
+#include RENDERER_SHADER_INCLUDE
 #include "utils.h"
 #include <stddef.h>
 #include <stdint.h>

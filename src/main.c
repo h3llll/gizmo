@@ -1,8 +1,8 @@
 #include "event/event.h"
 #include "renderer/renderer.h"
 #include "utils.h"
-#include "window/keys.h"
-#include "window/window.h"
+#include "libraries.h"
+#include WINDOW_INCLUDE
 
 void ms_cb(event_t *ev)
 {

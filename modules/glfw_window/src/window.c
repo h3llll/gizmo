@@ -1,4 +1,5 @@
-#include "window/window.h"
+#include "libraries.h"
+#include WINDOW_INCLUDE
 #include "event/event.h"
 #include "utils.h"
 #include <GLFW/glfw3.h>

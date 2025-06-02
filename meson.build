@@ -12,24 +12,30 @@ project(
   ],
 )
 
+USE_SDL = true  # false: glfw
+USE_GL = true   # false: vulkan
+USE_PA = true #false: idk yet maybe it's js gonna be only port audio
+
 add_global_arguments('-DDEBUG_BUILD', '-DACTIVE_LOG_LEVEL=3', language: 'c')
 
 list_script = meson.project_source_root() / 'scripts' / 'list-all-src.sh'
-inc_root = include_directories('include')
+inc_root = include_directories('include', 'modules')
 
+# lower level modules
 subdir('modules/dyarr')
-
 subdir('modules/event')
-subdir('modules/renderer')
-subdir('modules/window')
+
+if USE_SDL:
+  subdir('modules/sdl_renderer')
+else:
+  subdir('modules/glfw_renderer')
+
 subdir('modules/audio')
 
-
 dyarr_dep = dependency('dyarr')
-
 event_dep = dependency('event')
 renderer_dep = dependency('renderer')
-window_dep = dependency('window')
+glfw_window_dep = dependency('glfw_window')
 audio_dep = dependency('audio')
 
 src_files = run_command(
@@ -43,7 +49,7 @@ executable(
   src_files,
   dependencies: [
     renderer_dep,
-    window_dep,
+    glfw_window_dep,
     event_dep,
     dyarr_dep,
     audio_dep,

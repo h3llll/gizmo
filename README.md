@@ -1,5 +1,8 @@
 "funny game library"
 -me 
+IMPORTANT!!! NOTE!! TODO!!!! must fix build structure:
+    what i was planning for is each module of the same purpose (ex window) will have the same meson.build except for dependencies 
+    (sdl vs glfw) and they would each have the same dependency name so i could properly manage them in root meson.build
 
 i don't know what are my goals with this thing buuuuut
 

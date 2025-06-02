@@ -1,4 +1,4 @@
-inc_window = include_directories('include')
+inc_glfw_window = include_directories('include')
 
 list_script = meson.project_source_root() / 'scripts' / 'list-all-src.sh'
 src_files = run_command(
@@ -10,18 +10,18 @@ src_files = run_command(
 glfw_dep = dependency('glfw3')
 event_dep = dependency('event')
 
-window_lib = shared_library(
-  'window',
+glfw_window_lib = shared_library(
+  'glfw_window',
   src_files,
-  include_directories: [inc_window, inc_root],
+  include_directories: [inc_glfw_window, inc_root],
   dependencies: [glfw_dep, event_dep],
 )
 
-window_dep = declare_dependency(
-  include_directories: inc_window,
-  link_with: window_lib,
+glfw_window_dep = declare_dependency(
+  include_directories: inc_glfw_window,
+  link_with: glfw_window_lib,
   dependencies: [glfw_dep, event_dep]
   ,
 )
 
-meson.override_dependency('window', window_dep)
+meson.override_dependency('glfw_window', glfw_window_dep)

@@ -24,4 +24,4 @@ glfw_window_dep = declare_dependency(
   ,
 )
 
-meson.override_dependency('glfw_window', glfw_window_dep)
+meson.override_dependency('window', glfw_window_dep)

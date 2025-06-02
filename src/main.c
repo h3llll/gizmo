@@ -1,7 +1,7 @@
-#include "event/event.h"
-#include "renderer/renderer.h"
-#include "utils.h"
 #include "libraries.h"
+#include "event/event.h"
+#include RENDERER_INCLUDE
+#include "utils.h"
 #include WINDOW_INCLUDE
 
 void ms_cb(event_t *ev)

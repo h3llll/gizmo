@@ -24,4 +24,4 @@ sdl_window_dep = declare_dependency(
   ,
 )
 
-meson.override_dependency('sdl_window', sdl_window_dep)
+meson.override_dependency('window', sdl_window_dep)

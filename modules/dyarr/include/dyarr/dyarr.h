@@ -6,10 +6,9 @@
 #define ARR_ERR_INVALARG        1
 #define ARR_ERR_ALLOC           2
 #define ARR_ERR_SIZE_MISMATCH   3
-#define ARR_ERR_EMPTY           4
 
 #define array_get(arr, type, index)                         \
-    (((type *)(arr)->items)[index])
+    ((type)(arr)->items[index])
 
 // clang-format on
 
@@ -23,6 +22,9 @@ typedef struct array
     size_t cap;
     size_t item_size;
 } array;
+
+// Returns a string representation of given error code
+char *array_err_str(uint8_t code);
 
 // Returns a heap allocated array in the result pointer, which only
 // accepts items of specified item size.

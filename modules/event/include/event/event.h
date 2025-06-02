@@ -1,34 +1,22 @@
 #ifndef MODULES_EVENT_H
 #define MODULES_EVENT_H
 
-#include "dyarr/dyarr.h"
 #include <stdint.h>
 
 #define EVENT_NO_ERR 0
 #define EVENT_ERR_INVALARG 1
 #define EVENT_ERR_ALLOC 2
 
-typedef struct event
-{
-    uint8_t type;
-    void *data;
-
-} event_t;
-
+typedef struct event event_t;
 typedef void event_callback_t(event_t *);
-
-typedef struct event_system
-{
-    array *listeners;
-} event_system_t;
-
+typedef struct event_system event_system_t;
 
 // Returns a string representation of given error code.
 char *event_err_str(uint8_t code);
 
-// Creates a heap allocated event object in the result pointer.
+// Creates a heap allocated event object that its type is given type in the result pointer.
 // Returns EVENT_NO_ERR on success, 0< otherwise.
-uint8_t event_create(uint8_t type, event_t **result);
+uint8_t event_create(uint32_t type, event_t **result);
 
 // Inputs given data struct into event's data field.
 // Note that given event doesn't gain the ownership of the loaded data,

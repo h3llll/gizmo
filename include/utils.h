@@ -51,12 +51,12 @@
 #define ERR(fmt, ...)
 #endif // DEBUG_BUILD
 
-#define IS_NULL(ptr, code, module)                                        \
+#define IS_NULL(ptr, code, module, message)                               \
     do                                                                    \
     {                                                                     \
         if ((ptr) == NULL)                                                \
         {                                                                 \
-            ERR("[%s] NULL POINTER ERR", module);                         \
+            ERR("[%s] NULL POINTER ERR: %s", module, message);            \
             exit_code = code;                                             \
             goto cleanup;                                                 \
         }                                                                 \
@@ -104,65 +104,6 @@
 
 #include <stdlib.h>
 
-static inline uint8_t read_file(const char *path, char **result)
-{
-    uint8_t exit_code = UTIL_NO_ERR;
-    FILE *file = NULL;
-    char *_result = NULL;
-    long size = 0;
-
-    INFO("[UTILS] reading file %s", path);
-
-    file = fopen(path, "rb"); // use "rb" for binary compatibility
-    if (file == NULL)
-    {
-        ERR("[UTIL] failed to open file");
-        perror("fopen:");
-        exit_code = UTIL_ERR_IO;
-        goto cleanup;
-    }
-
-    if (fseek(file, 0, SEEK_END) != 0)
-    {
-        ERR("[UTIL] failed to seek to end of file");
-        perror("fseek:");
-        exit_code = UTIL_ERR_IO;
-        goto cleanup;
-    }
-
-    size = ftell(file);
-    if (size < 0)
-    {
-        ERR("[UTIL] failed to get file size");
-        perror("ftell:");
-        exit_code = UTIL_ERR_IO;
-        goto cleanup;
-    }
-
-    rewind(file); // or fseek(file, 0, SEEK_SET);
-
-    _result = malloc(size + 1); // +1 for null-terminator
-    IS_NULL(_result, UTIL_ERR_ALLOC, "UTIL");
-
-    size_t read = fread(_result, 1, size, file);
-    if (read != (size_t)size)
-    {
-        ERR("[UTIL] only read %zu of %ld bytes", read, size);
-        exit_code = UTIL_ERR_IO;
-        goto cleanup;
-    }
-
-    _result[size] = '\0';
-    *result = _result;
-
-    fclose(file);
-    return exit_code;
-
-cleanup:
-    FREE(file, fclose);
-    FREE(_result, free);
-    return exit_code;
-}
 #endif // UTIL_IMP
 
 #endif // UTILS_H

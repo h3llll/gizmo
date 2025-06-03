@@ -28,11 +28,15 @@ uint8_t event_load(event_t *event, void *data);
 // Returns EVENT_NO_ERR on success, 0< otherwise.
 uint8_t event_get_type(event_t *event, uint8_t *type);
 
+// Copies the target event's data into given data pointer argument.
+// Returns EVENT_NO_ERR on success, 0< otherwise.
+uint8_t event_clone_data(event_t *event, const void **data);
+
 // Gets the target event's data pointer.
 // Caller of this function shouldn't free or modify this pointer as this is 
 // the event creator's responsibility.
 // Returns EVENT_NO_ERR on success, 0< otherwise.
-uint8_t event_get_data(event_t *event, const void **data);
+uint8_t event_get_data_ptr(event_t *event, const void **data);
 
 // Creates a heap allocated event_system object.
 // Returns EVENT_NO_ERR on success, 0< otherwise.
@@ -58,11 +62,11 @@ uint8_t event_system_fire(event_system_t *event_sys, event_t *event);
 
 // Frees given event_system.
 // Returns EVENT_NO_ERR on success, 0< otherwise.
-uint8_t event_system_destroy(event_system_t *event_sys);
+uint8_t event_system_destroy(event_system_t **event_sys);
 
 // Frees given event.
 // Note that it doesn't free the data loaded through event_load to given
 // event. Returns EVENT_NO_ERR on success, 0< otherwise.
-uint8_t event_destroy(event_t *event);
+uint8_t event_destroy(event_t **event);
 
 #endif // MODULES_EVENT_H

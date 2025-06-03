@@ -6,13 +6,42 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+char *window_err_str(uint8_t code)
+{
+    switch (code)
+    {
+    case WIN_NO_ERR:
+        return "success";
+        break;
+
+    case WIN_ERR_GLFWERR:
+        return "glfw error";
+        break;
+
+    case WIN_ERR_ALLOC:
+        return "memory allocation failed";
+        break;
+
+    case WIN_ERR_INVALARG:
+        return "a NULL pointer was given as an argument";
+        break;
+
+    case WIN_ERR_EVENT_ALLOC:
+        return "an event function failed to allocate memroy";
+        break;
+
+    default:
+        return "invalid error code";
+    }
+}
+
 // Callback definitions
 void glfw_err_callback(int err, const char *desc)
 {
     ERR("[WINDOW] GLFW err\n code: %d\n desc: %s\n", err, desc);
 }
 
-void window_size_callback(GLFWwindow *glfw_win, int width, int height)
+void glfw_size_callback(GLFWwindow *glfw_win, int width, int height)
 {
     window_t *window = glfwGetWindowUserPointer(glfw_win);
     window->width = width;
@@ -21,7 +50,7 @@ void window_size_callback(GLFWwindow *glfw_win, int width, int height)
          width, height);
 }
 
-void window_close_callback(GLFWwindow *glfw_win)
+void glfw_close_callback(GLFWwindow *glfw_win)
 {
     INFO("[WINDOW] %p window is closing..\n", glfw_win);
     glfwSetWindowShouldClose(glfw_win, GLFW_TRUE);
@@ -47,8 +76,8 @@ void window_close_callback(GLFWwindow *glfw_win)
 // long term solution : make a good data sharing system and data structs
 // and shit
 
-void window_key_callback(GLFWwindow *glfw_win, int key, int scancode,
-                         int action, int mods)
+void glfw_key_callback(GLFWwindow *glfw_win, int key, int scancode,
+                       int action, int mods)
 {
     window_t *window = glfwGetWindowUserPointer(glfw_win);
     window->input_device->keyinfo->key = key;
@@ -62,12 +91,8 @@ void window_key_callback(GLFWwindow *glfw_win, int key, int scancode,
     {
         event_load(window->input_device->key_down_event,
                    window->input_device->keyinfo);
-
-        if (window->input_device->key_down_event->data != NULL)
-        {
-            event_system_fire(window->input_device->event_sys,
-                              window->input_device->key_down_event);
-        }
+        event_system_fire(window->input_device->event_sys,
+                          window->input_device->key_down_event);
         break;
     }
 
@@ -75,18 +100,15 @@ void window_key_callback(GLFWwindow *glfw_win, int key, int scancode,
     {
         event_load(window->input_device->key_released_event,
                    window->input_device->keyinfo);
-        if (window->input_device->key_released_event->data != NULL)
-        {
-            event_system_fire(window->input_device->event_sys,
-                              window->input_device->key_released_event);
-        }
+        event_system_fire(window->input_device->event_sys,
+                          window->input_device->key_released_event);
         break;
     }
     }
 }
 
-void window_mb_callback(GLFWwindow *glfw_win, int button, int action,
-                        int mods)
+void glfw_mb_callback(GLFWwindow *glfw_win, int button, int action,
+                      int mods)
 {
     window_t *window = glfwGetWindowUserPointer(glfw_win);
 
@@ -100,11 +122,8 @@ void window_mb_callback(GLFWwindow *glfw_win, int button, int action,
     {
         event_load(window->input_device->mb_down_event,
                    window->input_device->mbinfo);
-        if (window->input_device->mb_down_event->data != NULL)
-        {
-            event_system_fire(window->input_device->event_sys,
-                              window->input_device->mb_down_event);
-        }
+        event_system_fire(window->input_device->event_sys,
+                          window->input_device->mb_down_event);
         break;
     }
 
@@ -112,17 +131,14 @@ void window_mb_callback(GLFWwindow *glfw_win, int button, int action,
     {
         event_load(window->input_device->mb_released_event,
                    window->input_device->mbinfo);
-        if (window->input_device->mb_released_event->data != NULL)
-        {
-            event_system_fire(window->input_device->event_sys,
-                              window->input_device->mb_released_event);
-        }
+        event_system_fire(window->input_device->event_sys,
+                          window->input_device->mb_released_event);
         break;
     }
     }
 }
 
-void window_mp_callback(GLFWwindow *glfw_win, double x, double y)
+void glfw_mp_callback(GLFWwindow *glfw_win, double x, double y)
 {
     window_t *window = glfwGetWindowUserPointer(glfw_win);
 
@@ -136,8 +152,7 @@ void window_mp_callback(GLFWwindow *glfw_win, double x, double y)
                       window->input_device->mouse_motion_event);
 }
 
-void window_ms_callback(GLFWwindow *glfw_win, double xoffset,
-                        double yoffset)
+void glfw_ms_callback(GLFWwindow *glfw_win, double xoffset, double yoffset)
 {
     printf("scall");
     window_t *window = glfwGetWindowUserPointer(glfw_win);
@@ -152,13 +167,14 @@ void window_ms_callback(GLFWwindow *glfw_win, double xoffset,
                       window->input_device->mouse_scroll_event);
 }
 
-void window_fb_callback(GLFWwindow *glfw_win, int width, int height)
+void glfw_fb_callback(GLFWwindow *glfw_win, int width, int height)
 {
     INFO("[WINDOW] resized window");
     window_t *window = glfwGetWindowUserPointer(glfw_win);
     window->width = width;
     window->height = height;
 }
+
 // window_
 uint8_t window_module_init(void)
 {
@@ -198,22 +214,30 @@ uint8_t window_create(int32_t width, int32_t height, const char *title,
 
     // Window creation
     windata = glfwCreateWindow(width, height, title, NULL, NULL);
-    IS_NULL(windata, WIN_ERR_GLFWERR, "WINDOW");
+    IS_NULL(windata, WIN_ERR_GLFWERR, "WINDOW",
+            "glfw failed to create window");
 
     glfwMakeContextCurrent(windata);
 
     // Callbacks
-    glfwSetWindowCloseCallback(windata, window_close_callback);
-    glfwSetKeyCallback(windata, window_key_callback);
-    glfwSetMouseButtonCallback(windata, window_mb_callback);
-    glfwSetCursorPosCallback(windata, window_mp_callback);
-    glfwSetFramebufferSizeCallback(windata, window_fb_callback);
+    glfwSetWindowCloseCallback(windata, glfw_close_callback);
+    glfwSetKeyCallback(windata, glfw_key_callback);
+    glfwSetMouseButtonCallback(windata, glfw_mb_callback);
+    glfwSetCursorPosCallback(windata, glfw_mp_callback);
+    glfwSetFramebufferSizeCallback(windata, glfw_fb_callback);
     // Returning the handle
     _result = malloc(sizeof(window_t));
-    IS_NULL(_result, WIN_ERR_ALLOC, "WINDOW");
+    IS_NULL(_result, WIN_ERR_ALLOC, "WINDOW", "malloc failed");
+    uint8_t input_dev_code = input_device_create(&input_dev);
 
-    RET_ON_FAIL(input_device_create(&input_dev), WIN_ERR_ALLOC,
-                WIN_ERR_ALLOC, "WINDOW");
+    if (input_dev_code != WIN_NO_ERR)
+    {
+        ERR("[WINDOW] failed to create input device %s",
+            window_err_str(input_dev_code));
+
+        exit_code = input_dev_code;
+        goto cleanup;
+    }
 
     _result->input_device = input_dev;
     _result->data = windata;
@@ -229,8 +253,7 @@ uint8_t window_create(int32_t width, int32_t height, const char *title,
 cleanup:
 {
     FREE(_result, free);
-    if (windata != NULL)
-        glfwDestroyWindow(windata);
+    FREE(windata, glfwDestroyWindow);
     return exit_code;
 }
 }
@@ -238,7 +261,7 @@ cleanup:
 uint8_t window_closing(window_t *win)
 {
     uint8_t exit_code = WIN_NO_ERR;
-    IS_NULL(win, WIN_ERR_INVALARG, "WINDOW");
+    IS_NULL(win, WIN_ERR_INVALARG, "WINDOW", "\'win\' argument is NULL");
 
     return glfwWindowShouldClose(win->data);
 cleanup:
@@ -249,7 +272,7 @@ uint8_t window_swap_buffers(window_t *win)
 {
     uint8_t exit_code = WIN_NO_ERR;
 
-    IS_NULL(win, WIN_ERR_INVALARG, "WINDOW");
+    IS_NULL(win, WIN_ERR_INVALARG, "WINDOW", "\'win\' argument is NULL");
     glfwSwapBuffers(win->data);
 
     return exit_code;
@@ -264,15 +287,26 @@ uint8_t window_poll_events(void)
     return WIN_NO_ERR;
 }
 
-uint8_t window_destroy(window_t *win)
+uint8_t window_destroy(window_t **win)
 {
     uint8_t exit_code = WIN_NO_ERR;
 
-    IS_NULL(win, WIN_ERR_INVALARG, "WINDOW");
+    IS_NULL(win, WIN_ERR_INVALARG, "WINDOW", "\'win\' argument is NULL");
 
-    glfwDestroyWindow(win->data);
-    input_device_destroy(win->input_device);
-    FREE(win, free);
+    window_t *win_ptr = *win;
+    IS_NULL(win_ptr, WIN_ERR_INVALARG, "WINDOW",
+            "\'win\' argument points to NULL");
+
+    glfwDestroyWindow(win_ptr->data);
+
+    uint8_t input_dev_code = input_device_destroy(&win_ptr->input_device);
+    if (input_dev_code != WIN_NO_ERR)
+    {
+        WARN("[WINDOW] failed to free input device: %s, freeing window.",
+             window_err_str(input_dev_code));
+    }
+
+    FREE(win_ptr, free);
 
     return exit_code;
 
@@ -292,71 +326,73 @@ const void *window_get_proc(const char *proc_name)
     return glfwGetProcAddress(proc_name);
 }
 
-uint8_t window_key_pressed(window_t *window, int key)
+uint8_t window_key_pressed(window_t *win, int key)
 {
     uint8_t exit_code = WIN_NO_ERR;
 
-    IS_NULL(window, WIN_ERR_INVALARG, "WINDOW");
-    return glfwGetKey(window->data, key) == GLFW_PRESS;
+    IS_NULL(win, WIN_ERR_INVALARG, "WINDOW", "\'win\' argument was NULL");
+    return glfwGetKey(win->data, key) == GLFW_PRESS;
 
 cleanup:
     return exit_code;
 }
 
-uint8_t window_key_repeated(window_t *window, int key)
+uint8_t window_key_repeated(window_t *win, int key)
 {
     uint8_t exit_code = WIN_NO_ERR;
 
-    IS_NULL(window, WIN_ERR_INVALARG, "WINDOW");
-    return glfwGetKey(window->data, key) == GLFW_REPEAT;
+    IS_NULL(win, WIN_ERR_INVALARG, "WINDOW", "\'win\' argument is NULL");
+    return glfwGetKey(win->data, key) == GLFW_REPEAT;
 
 cleanup:
     return exit_code;
 }
 
-uint8_t window_key_released(window_t *window, int key)
+uint8_t window_key_released(window_t *win, int key)
 {
     uint8_t exit_code = WIN_NO_ERR;
 
-    IS_NULL(window, WIN_ERR_INVALARG, "WINDOW");
-    return glfwGetKey(window->data, key) == GLFW_RELEASE;
+    IS_NULL(win, WIN_ERR_INVALARG, "WINDOW", "\'win\' argument is NULL");
+    return glfwGetKey(win->data, key) == GLFW_RELEASE;
 
 cleanup:
     return exit_code;
 }
 
-uint8_t window_mousebutton_pressed(window_t *window, int button)
+uint8_t window_mousebutton_pressed(window_t *win, int button)
 {
     uint8_t exit_code = WIN_NO_ERR;
 
-    IS_NULL(window, WIN_ERR_INVALARG, "WINDOW");
-    return glfwGetMouseButton(window->data, button) == GLFW_PRESS;
+    IS_NULL(win, WIN_ERR_INVALARG, "WINDOW", "\'win\' argument is NULL");
+    return glfwGetMouseButton(win->data, button) == GLFW_PRESS;
 
 cleanup:
     return exit_code;
 }
 
-uint8_t window_mousebutton_released(window_t *window, int button)
+uint8_t window_mousebutton_released(window_t *win, int button)
 {
     uint8_t exit_code = WIN_NO_ERR;
 
-    IS_NULL(window, WIN_ERR_INVALARG, "WINDOW");
-    return glfwGetMouseButton(window->data, button) == GLFW_RELEASE;
+    IS_NULL(win, WIN_ERR_INVALARG, "WINDOW", "\'win\' argument is NULL");
+    return glfwGetMouseButton(win->data, button) == GLFW_RELEASE;
 
 cleanup:
     return exit_code;
 }
 
-uint8_t window_get_mouse_pos(window_t *window, double *x_result,
+uint8_t window_get_mouse_pos(window_t *win, double *x_result,
                              double *y_result)
 {
     uint8_t exit_code = WIN_NO_ERR;
 
-    IS_NULL(window, WIN_ERR_INVALARG, "WINDOW");
-    IS_NULL(x_result, WIN_ERR_INVALARG, "WINDOW");
-    IS_NULL(y_result, WIN_ERR_INVALARG, "WINDOW");
+    IS_NULL(win, WIN_ERR_INVALARG, "WINDOW", "\'win\' argument is NULL");
+    IS_NULL(x_result, WIN_ERR_INVALARG, "WINDOW",
+            "\'x_result\' argument is NULL");
+    IS_NULL(y_result, WIN_ERR_INVALARG, "WINDOW",
+            "\'y_result\' argument is NULL");
 
-    glfwGetCursorPos(window->data, x_result, y_result);
+    glfwGetCursorPos(win->data, x_result, y_result);
     return WIN_NO_ERR;
 
 cleanup:
@@ -371,93 +407,149 @@ uint8_t input_device_create(input_device_t **result)
     input_device_t *_result = NULL;
 
     _result = malloc(sizeof(input_device_t));
-    IS_NULL(_result, WIN_ERR_ALLOC, "WINDOW");
+    IS_NULL(_result, WIN_ERR_ALLOC, "WINDOW", "malloc failed");
+    uint8_t event_exit_code = EVENT_NO_ERR;
+    uint8_t info_exit_code = WIN_NO_ERR;
 
-    RET_ON_FAIL(event_create(WINEVENT_KEY_DOWN, &_result->key_down_event),
-                EVENT_ERR_ALLOC, WIN_ERR_ALLOC, "WINDOW");
+    event_exit_code =
+        event_create(WINEVENT_KEY_DOWN, &_result->key_down_event);
+    if (event_exit_code != EVENT_NO_ERR)
+    {
+        ERR("[WINDOW] failed to create key_down_event: %s",
+            event_err_str(event_exit_code));
+        exit_code = event_exit_code;
+        goto cleanup;
+    }
 
-    RET_ON_FAIL(
-        event_create(WINEVENT_KEY_RELEASED, &_result->key_released_event),
-        EVENT_ERR_ALLOC, WIN_ERR_ALLOC, "WINDOW");
+    event_exit_code =
+        event_create(WINEVENT_KEY_RELEASED, &_result->key_released_event);
+    if (event_exit_code != EVENT_NO_ERR)
+    {
+        ERR("[WINDOW] failed to create key_released_event: %s",
+            event_err_str(event_exit_code));
+        exit_code = event_exit_code;
 
-    RET_ON_FAIL(
-        event_create(WINEVENT_MOUSE_BUTTONDOWN, &_result->mb_down_event),
-        EVENT_ERR_ALLOC, WIN_ERR_ALLOC, "WINDOW");
+        goto cleanup;
+    }
 
-    RET_ON_FAIL(
-        event_create(WINEVENT_MOUSE_BUTTONUP, &_result->mb_released_event),
-        EVENT_ERR_ALLOC, WIN_ERR_ALLOC, "WINDOW");
+    event_exit_code =
+        event_create(WINEVENT_KEY_RELEASED, &_result->mb_down_event);
+    if (event_exit_code != EVENT_NO_ERR)
+    {
+        ERR("[WINDOW] failed to create mb_down_event: %s",
+            event_err_str(event_exit_code));
+        exit_code = event_exit_code;
+        goto cleanup;
+    }
 
-    RET_ON_FAIL(
-        event_create(WINEVENT_MOUSE_MOTION, &_result->mouse_motion_event),
-        EVENT_ERR_ALLOC, WIN_ERR_ALLOC, "WINDOW");
+    event_exit_code =
+        event_create(WINEVENT_KEY_RELEASED, &_result->mb_released_event);
+    if (event_exit_code != EVENT_NO_ERR)
+    {
+        ERR("[WINDOW] failed to create mb_released_event: %s",
+            event_err_str(event_exit_code));
+        exit_code = event_exit_code;
+        goto cleanup;
+    }
 
-    RET_ON_FAIL(
-        event_create(WINEVENT_MOUSE_SCROLL, &_result->mouse_scroll_event),
-        EVENT_ERR_ALLOC, WIN_ERR_ALLOC, "WINDOW");
+    event_exit_code =
+        event_create(WINEVENT_KEY_RELEASED, &_result->mouse_motion_event);
+    if (event_exit_code != EVENT_NO_ERR)
+    {
+        ERR("[WINDOW] failed to create mouse_motion_event: %s",
+            event_err_str(event_exit_code));
+        exit_code = event_exit_code;
+        goto cleanup;
+    }
 
-    RET_ON_FAIL(event_system_create(&_result->event_sys), EVENT_ERR_ALLOC,
-                WIN_ERR_ALLOC, "WINDOW");
+    event_exit_code =
+        event_create(WINEVENT_KEY_RELEASED, &_result->mouse_scroll_event);
+    if (event_exit_code != EVENT_NO_ERR)
+    {
+        ERR("[WINDOW] failed to create mouse_scroll_event: %s",
+            event_err_str(event_exit_code));
+        exit_code = event_exit_code;
+        goto cleanup;
+    }
 
-    RET_ON_FAIL(key_info_create(0, 0, 0, &_result->keyinfo), WIN_ERR_ALLOC,
-                WIN_ERR_ALLOC, "WINDOW");
+    event_exit_code = event_system_create(&_result->event_sys);
+    if (event_exit_code != EVENT_NO_ERR)
+    {
+        ERR("[WINDOW] failed to create event_sys: %s",
+            event_err_str(event_exit_code));
 
-    RET_ON_FAIL(mb_info_create(0, 0, &_result->mbinfo), WIN_ERR_ALLOC,
-                WIN_ERR_ALLOC, "WINDOW");
+        exit_code = event_exit_code;
+        goto cleanup;
+    }
 
-    RET_ON_FAIL(mp_info_create(0, 0, &_result->mpinfo), WIN_ERR_ALLOC,
-                WIN_ERR_ALLOC, "WINDOW");
+    info_exit_code = key_info_create(0, 0, 0, &_result->keyinfo);
+    if (info_exit_code != WIN_NO_ERR)
+    {
+        ERR("[WINDOW] failed to create keyinfo: %s",
+            window_err_str(info_exit_code));
+        exit_code = info_exit_code;
+        goto cleanup;
+    }
 
-    RET_ON_FAIL(ms_info_create(0, 0, &_result->msinfo), WIN_ERR_ALLOC,
-                WIN_ERR_ALLOC, "WINDOW");
+    info_exit_code = mb_info_create(0, 0, &_result->mbinfo);
+    if (info_exit_code != WIN_NO_ERR)
+    {
+        ERR("[WINDOW] failed to create mbinfo: %s",
+            window_err_str(info_exit_code));
+        exit_code = info_exit_code;
+        goto cleanup;
+    }
 
+    info_exit_code = mp_info_create(0, 0, &_result->mpinfo);
+    if (info_exit_code != WIN_NO_ERR)
+    {
+        ERR("[WINDOW] failed to create mpinfo: %s",
+            window_err_str(info_exit_code));
+        exit_code = info_exit_code;
+        goto cleanup;
+    }
+
+    info_exit_code = ms_info_create(0, 0, &_result->msinfo);
+    if (info_exit_code != WIN_NO_ERR)
+    {
+        ERR("[WINDOW] failed to create msinfo: %s",
+            window_err_str(info_exit_code));
+        exit_code = info_exit_code;
+        goto cleanup;
+    }
     *result = _result;
 
     return exit_code;
 
 cleanup:
 {
-    FREE(_result->mbinfo, mb_info_destroy);
-
-    FREE(_result->keyinfo, key_info_destroy);
-
-    FREE(_result->mpinfo, mp_info_destroy);
-    FREE(_result->msinfo, ms_info_destroy);
-
-    FREE(_result->event_sys, event_system_destroy);
-
-    FREE(_result->key_down_event, event_destroy);
-    FREE(_result->key_released_event, event_destroy);
-
-    FREE(_result->mb_down_event, event_destroy);
-    FREE(_result->mb_released_event, event_destroy);
-
-    FREE(_result->mouse_motion_event, event_destroy);
-    FREE(_result->mouse_scroll_event, event_destroy);
-    FREE(_result, free);
-
+    input_device_destroy(&_result);
     return exit_code;
 }
 }
 
-uint8_t input_device_destroy(input_device_t *dev)
+uint8_t input_device_destroy(input_device_t **dev)
 {
     uint8_t exit_code = WIN_NO_ERR;
-    IS_NULL(dev, WIN_ERR_INVALARG, "WINDOW");
-    event_system_destroy(dev->event_sys);
+    IS_NULL(dev, WIN_ERR_INVALARG, "WINDOW", "\'dev\' argument is NULL");
 
-    event_destroy(dev->key_down_event);
-    event_destroy(dev->key_released_event);
-    event_destroy(dev->mb_down_event);
-    event_destroy(dev->mb_released_event);
-    event_destroy(dev->mouse_motion_event);
-    event_destroy(dev->mouse_scroll_event);
+    input_device_t *dev_ptr = *dev;
+    IS_NULL(dev_ptr, WIN_ERR_INVALARG, "WINDOW",
+            "\'dev\' is a pointer to NULL");
 
-    key_info_destroy(dev->keyinfo);
-    mb_info_destroy(dev->mbinfo);
-    mp_info_destroy(dev->mpinfo);
-    ms_info_destroy(dev->msinfo);
-    FREE(dev, free);
+    FREE_PTR(&dev_ptr->event_sys, event_system_destroy);
+
+    FREE_PTR(&dev_ptr->key_down_event, event_destroy);
+    FREE_PTR(&dev_ptr->key_released_event, event_destroy);
+    FREE_PTR(&dev_ptr->mb_down_event, event_destroy);
+    FREE_PTR(&dev_ptr->mb_released_event, event_destroy);
+    FREE_PTR(&dev_ptr->mouse_motion_event, event_destroy);
+    FREE_PTR(&dev_ptr->mouse_scroll_event, event_destroy);
+    FREE_PTR(&dev_ptr->keyinfo, key_info_destroy);
+    FREE_PTR(&dev_ptr->mbinfo, mb_info_destroy);
+    FREE_PTR(&dev_ptr->mpinfo, mp_info_destroy);
+    FREE_PTR(&dev_ptr->msinfo, ms_info_destroy);
+    FREE(dev_ptr, free);
 
     return exit_code;
 
@@ -470,10 +562,11 @@ uint8_t key_info_create(int32_t key, int32_t scancode, int32_t mods,
                         key_info_t **result)
 {
     uint8_t exit_code = WIN_NO_ERR;
-    IS_NULL(result, WIN_ERR_INVALARG, "WINDOW");
+    IS_NULL(result, WIN_ERR_INVALARG, "WINDOW",
+            "\'result\' argument is NULL");
 
     key_info_t *_result = malloc(sizeof(key_info_t));
-    IS_NULL(_result, WIN_ERR_ALLOC, "WINDOW");
+    IS_NULL(_result, WIN_ERR_ALLOC, "WINDOW", "malloc failed");
 
     _result->key = key;
     _result->scancode = scancode;
@@ -486,12 +579,18 @@ cleanup:
     return exit_code;
 }
 
-uint8_t key_info_destroy(key_info_t *keyinfo)
+uint8_t key_info_destroy(key_info_t **keyinfo)
 {
     uint8_t exit_code = WIN_NO_ERR;
 
-    IS_NULL(keyinfo, WIN_ERR_INVALARG, "WINDOW");
-    FREE(keyinfo, free);
+    IS_NULL(keyinfo, WIN_ERR_INVALARG, "WINDOW",
+            "\'keyinfo\' argument is NULL");
+
+    key_info_t *keyinfo_ptr = *keyinfo;
+    IS_NULL(keyinfo_ptr, WIN_ERR_INVALARG, "WINDOW",
+            "\'keyinfo\' is a pointer to NULL");
+
+    FREE(keyinfo_ptr, free);
 
     return exit_code;
 
@@ -504,10 +603,11 @@ uint8_t mb_info_create(int32_t button, int32_t mods, mb_info_t **result)
 {
     uint8_t exit_code = WIN_NO_ERR;
 
-    IS_NULL(result, WIN_ERR_INVALARG, "WINDOW");
+    IS_NULL(result, WIN_ERR_INVALARG, "WINDOW",
+            "\'result\' argument is NULL");
 
     mb_info_t *_result = malloc(sizeof(mb_info_t));
-    IS_NULL(_result, WIN_ERR_ALLOC, "WINDOW");
+    IS_NULL(_result, WIN_ERR_ALLOC, "WINDOW", "malloc failed");
 
     _result->button = button;
     _result->mods = mods;
@@ -519,12 +619,16 @@ cleanup:
     return exit_code;
 }
 
-uint8_t mb_info_destroy(mb_info_t *mbinfo)
+uint8_t mb_info_destroy(mb_info_t **mbinfo)
 {
     uint8_t exit_code = WIN_NO_ERR;
 
-    IS_NULL(mbinfo, WIN_ERR_INVALARG, "WINDOW");
-    FREE(mbinfo, free);
+    IS_NULL(mbinfo, WIN_ERR_INVALARG, "WINDOW",
+            "\'mbinfo\' argument is NULL");
+    IS_NULL(*mbinfo, WIN_ERR_INVALARG, "WINDOW",
+            "\'mbinfo\' argument points to NULL");
+
+    FREE(*mbinfo, free);
 
     return exit_code;
 
@@ -537,10 +641,11 @@ uint8_t mp_info_create(double x, double y, mp_info_t **result)
 {
     uint8_t exit_code = WIN_NO_ERR;
 
-    IS_NULL(result, WIN_ERR_INVALARG, "WINDOW");
+    IS_NULL(result, WIN_ERR_INVALARG, "WINDOW",
+            "\'result\' argument is NULL");
 
     mp_info_t *_result = malloc(sizeof(mp_info_t));
-    IS_NULL(_result, WIN_ERR_ALLOC, "WINDOW");
+    IS_NULL(_result, WIN_ERR_ALLOC, "WINDOW", "malloc failed");
 
     _result->x = x;
     _result->y = y;
@@ -552,12 +657,15 @@ cleanup:
     return exit_code;
 }
 
-uint8_t mp_info_destroy(mp_info_t *mpinfo)
+uint8_t mp_info_destroy(mp_info_t **mpinfo)
 {
     uint8_t exit_code = WIN_NO_ERR;
 
-    IS_NULL(mpinfo, WIN_ERR_INVALARG, "WINDOW");
-    FREE(mpinfo, free);
+    IS_NULL(mpinfo, WIN_ERR_INVALARG, "WINDOW",
+            "\'mpinfo\' argument is NULL");
+    IS_NULL(*mpinfo, WIN_ERR_INVALARG, "WINDOW",
+            "\'mpinfo\' points to NULL");
+    FREE(*mpinfo, free);
 
     return exit_code;
 cleanup:
@@ -569,10 +677,11 @@ uint8_t ms_info_create(double xoffset, double yoffset, ms_info_t **result)
 {
     uint8_t exit_code = WIN_NO_ERR;
 
-    IS_NULL(result, WIN_ERR_INVALARG, "WINDOW");
+    IS_NULL(result, WIN_ERR_INVALARG, "WINDOW",
+            "\'result\' argument is NULL");
 
     ms_info_t *_result = malloc(sizeof(ms_info_t));
-    IS_NULL(_result, WIN_ERR_ALLOC, "WINDOW");
+    IS_NULL(_result, WIN_ERR_ALLOC, "WINDOW", "malloc failed");
 
     _result->xoffset = xoffset;
     _result->yoffset = yoffset;
@@ -584,12 +693,15 @@ cleanup:
     return exit_code;
 }
 
-uint8_t ms_info_destroy(ms_info_t *msinfo)
+uint8_t ms_info_destroy(ms_info_t **msinfo)
 {
     uint8_t exit_code = WIN_NO_ERR;
 
-    IS_NULL(msinfo, WIN_ERR_INVALARG, "WINDOW");
-    FREE(msinfo, free);
+    IS_NULL(msinfo, WIN_ERR_INVALARG, "WINDOW",
+            "\'msinfo\' argument is NULL");
+    IS_NULL(*msinfo, WIN_ERR_INVALARG, "WINDOW",
+            "\'msinfo\' is a pointer to NULL");
+    FREE(*msinfo, free);
 
     return exit_code;
 cleanup:

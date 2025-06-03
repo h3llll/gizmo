@@ -1,6 +1,7 @@
-#include "shader.h"
-#include "glad/glad.h"
-#include "renderer/renderer.h"
+#include "libraries.h"
+#include RENDERER_SHADER_INCLUDE
+#include GLAD_INCLUDE
+#include RENDERER_INCLUDE
 
 #define UTIL_IMP
 #include "utils.h"
@@ -37,7 +38,7 @@ static const char *base_frag_sh = "#version 330 core\n"
 uint8_t shader_compile(uint32_t shader, int32_t type)
 {
     int32_t success;
-    char log[512] = {'n', 'o', ' ', 'e', 'r', 'r', 'o', 'r', '\n'};
+    char log[512] = "no err";
     glCompileShader(shader);
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
 
@@ -75,16 +76,19 @@ uint8_t shader_create(const char *vert_path, const char *frag_path,
     shader_t *_result = NULL;
 
     INFO("[RENDERER->SHADER] creating shader");
-    IS_NULL(vert_path, SHADER_ERR_INVALARG, "[RENDERER->SHADER]");
-    IS_NULL(frag_path, SHADER_ERR_INVALARG, "[RENDERER->SHADER]");
+    IS_NULL(vert_path, SHADER_ERR_INVALARG, "[RENDERER->SHADER]",
+            "\'vert_path\' argument is NULL");
+    IS_NULL(frag_path, SHADER_ERR_INVALARG, "[RENDERER->SHADER]",
+            "\'frag_path\' argument is NULL");
 
-    RET_ON_FAIL(read_file(vert_path, &vert_src), UTIL_ERR_IO,
-                SHADER_ERR_IO, "RENDERER->SHADER");
-    RET_ON_FAIL(read_file(frag_path, &frag_src), UTIL_ERR_IO,
-                SHADER_ERR_IO, "RENDERER->SHADER");
+    // MAKING AN IO MODULE RN
+    // TODO
+    // io_load_file(vert_path, &vert_src);
+    // io_load_file(vert_path, &frag_src);
 
     _result = malloc(sizeof(shader_t));
-    IS_NULL(_result, SHADER_ERR_ALLOC, "RENDERER->SHADER");
+    IS_NULL(_result, SHADER_ERR_ALLOC, "RENDERER->SHADER",
+            "malloc failed");
 
     vert_shader = glCreateShader(GL_VERTEX_SHADER);
     frag_shader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -151,7 +155,8 @@ uint8_t shader_create_fallback(shader_t **result)
     INFO("[RENDERER->SHADER] creating shader");
 
     _result = malloc(sizeof(shader_t));
-    IS_NULL(_result, SHADER_ERR_ALLOC, "RENDERER->SHADER");
+    IS_NULL(_result, SHADER_ERR_ALLOC, "RENDERER->SHADER",
+            "malloc failed");
 
     vert_shader = glCreateShader(GL_VERTEX_SHADER);
     frag_shader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -208,7 +213,8 @@ cleanup:
 uint8_t shader_use(shader_t *shader)
 {
     uint8_t exit_code = SHADER_NO_ERR;
-    IS_NULL(shader, SHADER_ERR_INVALARG, "RENDERER->SHADER");
+    IS_NULL(shader, SHADER_ERR_INVALARG, "RENDERER->SHADER",
+            "\'shader\' argument is NULL");
     glUseProgram(shader->prog);
     return exit_code;
 
@@ -219,7 +225,8 @@ cleanup:
 uint8_t shader_strip(shader_t *shader)
 {
     uint8_t exit_code = SHADER_NO_ERR;
-    IS_NULL(shader, SHADER_ERR_INVALARG, "RENDERER->SHADER");
+    IS_NULL(shader, SHADER_ERR_INVALARG, "RENDERER->SHADER",
+            "\'shader\' argument is NULL");
 
     glDeleteShader(shader->vert);
     glDeleteShader(shader->frag);
@@ -237,11 +244,13 @@ uint8_t shader_destroy(shader_t **shader)
 {
     uint8_t exit_code = SHADER_NO_ERR;
 
-    IS_NULL(shader, SHADER_ERR_INVALARG, "RENDERER->SHADER");
+    IS_NULL(shader, SHADER_ERR_INVALARG, "RENDERER->SHADER",
+            "\'shader\' argument is NULL");
 
     shader_t *_shader = *shader;
-    IS_NULL(_shader, SHADER_ERR_INVALARG, "RENDERER->SHADER");
-    
+    IS_NULL(_shader, SHADER_ERR_INVALARG, "RENDERER->SHADER",
+            "\'shader\' argument is a pointer to NULL");
+
     glDeleteShader(_shader->vert);
     glDeleteShader(_shader->frag);
     glDeleteProgram(_shader->prog);
@@ -262,7 +271,9 @@ uint8_t shader_uniform_vec2f(shader_t *shader, const char *name, float x,
                              float y)
 {
     int exit_code = RENDERER_NO_ERR;
-    IS_NULL(shader, RENDERER_ERR_INVALARG, "RENDERER");
+    IS_NULL(shader, RENDERER_ERR_INVALARG, "RENDERER->SHADER", "\'shader\' argument is NULL");
+    IS_NULL(name, RENDERER_ERR_INVALARG, "RENDERER->SHADER", "\'name\' argument is NULL");
+
     int32_t uniform_loc = glGetUniformLocation(shader->prog, name);
 
     if (uniform_loc == -1)

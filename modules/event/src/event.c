@@ -1,8 +1,10 @@
-#include "event/event.h"
+#include "libraries.h"
+#include EVENT_INCLUDE
 #include "dyarr/dyarr.h"
 #include "utils.h"
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 
 struct event
 {
@@ -85,7 +87,7 @@ cleanup:
     return exit_code;
 }
 
-uint8_t event_get_data(event_t *event, const void **data)
+uint8_t event_get_data_ptr(event_t *event, const void **data)
 {
     uint8_t exit_code = EVENT_NO_ERR;
     IS_NULL(event, EVENT_ERR_INVALARG, "EVENT",
@@ -96,6 +98,25 @@ uint8_t event_get_data(event_t *event, const void **data)
     IS_NULL(event->data, EVENT_ERR_INVALARG, "EVENT",
             "given event object doesn't hold any data");
     *data = event->data;
+
+    return exit_code;
+cleanup:
+    return exit_code;
+}
+
+uint8_t event_get_data(event_t *event, void **data)
+{
+    uint8_t exit_code = EVENT_NO_ERR;
+    IS_NULL(event, EVENT_ERR_INVALARG, "EVENT",
+            "\'event\' argument is NULL");
+    IS_NULL(data, EVENT_ERR_INVALARG, "EVENT",
+            "\'data\' argument is NULL");
+
+    IS_NULL(event->data, EVENT_ERR_INVALARG, "EVENT",
+            "given event object doesn't hold any data");
+   
+    size_t data_size = sizeof(event->data);
+    memcpy(*data, event->data, data_size);
 
     return exit_code;
 cleanup:
@@ -150,10 +171,13 @@ uint8_t event_system_fire(event_system_t *event_sys, event_t *event)
 {
     uint8_t exit_code = EVENT_NO_ERR;
 
+    IS_NULL(event_sys, EVENT_ERR_INVALARG, "EVENT", "\'event_sys\' argument is NULL");
+    IS_NULL(event, EVENT_ERR_INVALARG, "EVENT", "\'event\' argument is NULL");
+
     for (size_t i = 0; i < event_sys->listeners->count; i++)
     {
-        event_callback_t callback =
-            array_get(event_sys->listeners, event_callback_t, i); // syntax error here ffs TODO ERROR README BAD DANGEROUS SEX
+        event_callback_t *callback = NULL; // TODO continue this, this is a placeholder
+        (void) callback;
     }
 
     return exit_code;
@@ -161,10 +185,33 @@ cleanup:
     return exit_code;
 }
 
-uint8_t event_system_destroy(event_system_t *event_sys)
+uint8_t event_system_destroy(event_system_t **event_sys)
 {
+    uint8_t exit_code = EVENT_NO_ERR;
+
+    IS_NULL(event_sys, EVENT_ERR_INVALARG, "EVENT", "\'event_sys\' argument is NULL");
+    IS_NULL(*event_sys, EVENT_ERR_INVALARG, "EVENT", "\'event_sys\' is a pointer to NULL");
+
+    FREE_PTR(&(*event_sys)->listeners, array_destroy);
+    FREE(*event_sys, free);
+
+    return exit_code;
+cleanup:
+    return exit_code;
+
 }
 
-uint8_t event_destroy(event_t *event)
+uint8_t event_destroy(event_t **event)
 {
+    uint8_t exit_code = EVENT_NO_ERR;
+
+    IS_NULL(event, EVENT_ERR_INVALARG, "EVENT", "\'event\' argument is NULL");
+    IS_NULL(*event, EVENT_ERR_INVALARG, "EVENT", "\'event\' is a pointer to NULL");
+
+    FREE(*event, free);
+
+    return exit_code;
+cleanup:
+    return exit_code;
+
 }

@@ -1,14 +1,15 @@
 #ifndef LIBRARIES_H
 #define LIBRARIES_H
 
-#define GL_INCLUDE "renderer/GL_renderer.h"
-// #define VK_INCLUDE 
+// ----------- WINDOW
 
 #ifdef USE_GLFW
 #define WINDOW_INCLUDE "window/glfw_window.h"
 #else /* USE_GLFW */
 #define WINDOW_INCLUDE "sdl_window/include/window/window.h"
 #endif /* USE_GLFW */
+
+// ----------- RENDERER
 
 //#ifdef USE_GL 
 // NOTE: still unused.
@@ -19,5 +20,12 @@
 //#else /* USE_GL */
 //#define RENDERER_INCLUDE "renderer/vk_renderer.h"
 //#endif /* USE_GL */
+
+// ----------- EVENT
+#define EVENT_INCLUDE "event/event.h"
+
+// ----------- DYARR
+#define DYARR_INCLUDE "dyarr/dyarr.h"
+
 
 #endif /* LIBRARIES_H */

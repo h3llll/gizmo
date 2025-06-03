@@ -8,11 +8,51 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+struct colori
+{
+    int8_t r, g, b, a;
+};
+
+struct colorf
+{
+    float r, g, b, a;
+};
+
+struct vertex
+{
+    float x, y, z;
+    float r, g, b, a;
+    float u, v;
+    float nx, ny, nz;
+};
+
+struct camera
+{
+
+};
+
+struct renderer
+{
+    array *vertex_array;
+    array *index_array;
+    shader_t *shader;
+    colorf_t col;
+    uint32_t VAO, VBO, EBO;
+    int32_t v_width, v_height;
+
+};
+
 void APIENTRY gl_err_callback(GLenum source, GLenum type, GLuint id,
                               GLenum severity, GLsizei length,
                               const GLchar *message,
                               const void *user_param)
 {
+    (void)user_param; // satisfying unused_param warning
+    (void)id;
+    (void)type;
+    (void)length;
+    (void)source;
+
     switch (severity)
     {
     case GL_DEBUG_SEVERITY_HIGH:
@@ -29,13 +69,41 @@ void APIENTRY gl_err_callback(GLenum source, GLenum type, GLuint id,
     }
 }
 
+char *renderer_err_str(uint8_t code)
+{
+    switch (code)
+    {
+    case RENDERER_ERR_INVALARG:
+        return "NULL argument was passed";
+        break;
+
+    case RENDERER_ERR_ALLOC:
+        return "memory allocation failed";
+        break;
+
+    case RENDERER_ERR_GLADFAIL:
+        return "GLAD failed to load";
+        break;
+
+    case RENDERER_NO_ERR:
+        return "success";
+        break;
+
+    default:
+        return "invalid error code";
+        break;
+    }
+}
+
 uint8_t renderer_module_init(void *(*get_proc_address_func)(const char *))
 {
     uint8_t exit_code = RENDERER_NO_ERR;
 
     INFO("[RENDERER] initializing glad\n");
-    IS_NULL(get_proc_address_func, RENDERER_ERR_INVALARG, "RENDERER");
-    RET_ON_FAIL(gladLoadGLLoader(get_proc_address_func), 0,
+    IS_NULL(get_proc_address_func, RENDERER_ERR_INVALARG, "RENDERER",
+            "get_proc_address_func\'");
+    RET_ON_FAIL(gladLoadGLLoader(get_proc_address_func),
+                0, // GLAD returns 0 on fail idk why
                 RENDERER_ERR_GLADFAIL, "RENDERER");
 
     const char *version = (const char *)glGetString(GL_VERSION);
@@ -126,15 +194,24 @@ static uint8_t setup_arr(renderer_t *r)
     array *vert_arr = NULL;
     array *ind_arr = NULL;
 
-    IS_NULL(r, RENDERER_ERR_INVALARG, "RENDERER->INTERNAL");
+    IS_NULL(r, RENDERER_ERR_INVALARG, "RENDERER->INTERNAL",
+            "UNDEFINED BEHAVOUR: renderer pointer passed to setup_arr is "
+            "NULL");
 
-    RET_ON_FAIL(
-        array_create(&vert_arr, MAX_FRAME_VERTICES * 0.5, sizeof(vertex_t)),
-        ARR_ERR_ALLOC, RENDERER_ERR_ALLOC, "RENDERER");
+    uint8_t arr_ret_code = array_create(
+        &vert_arr, MAX_FRAME_VERTICES * 0.5, sizeof(vertex_t));
 
-    RET_ON_FAIL(
-        array_create(&ind_arr, MAX_FRAME_INDICES * 0.5, sizeof(uint32_t)),
-        ARR_ERR_ALLOC, RENDERER_ERR_ALLOC, "RENDERER");
+    if (arr_ret_code != ARR_NO_ERR)
+    {
+        ERR("[RENDERER] failed to create vertex array");
+    }
+    arr_ret_code =
+        array_create(&ind_arr, MAX_FRAME_VERTICES * 0.5, sizeof(vertex_t));
+
+    if (arr_ret_code != ARR_NO_ERR)
+    {
+        ERR("[RENDERER] failed to create index array");
+    }
 
     r->vertex_array = vert_arr;
     r->index_array = ind_arr;
@@ -142,8 +219,8 @@ static uint8_t setup_arr(renderer_t *r)
     return exit_code;
 
 cleanup:
-    FREE_PTR(vert_arr, array_destroy);
-    FREE_PTR(ind_arr, array_destroy);
+    FREE_PTR(&vert_arr, array_destroy);
+    FREE_PTR(&ind_arr, array_destroy);
     return exit_code;
 }
 
@@ -155,10 +232,11 @@ uint8_t renderer_create(renderer_t **result, const char *vert_path,
     INFO("[RENDERER] creating renderer");
     renderer_t *_result = NULL;
 
-    IS_NULL(result, RENDERER_ERR_INVALARG, "RENDERER");
+    IS_NULL(result, RENDERER_ERR_INVALARG, "RENDERER",
+            "\'result\' argument is NULL");
 
     _result = malloc(sizeof(renderer_t));
-    IS_NULL(_result, RENDERER_ERR_ALLOC, "RENDERER");
+    IS_NULL(_result, RENDERER_ERR_ALLOC, "RENDERER", "malloc failed");
 
     _result->col = (colorf_t){
         .r = 0,
@@ -167,18 +245,28 @@ uint8_t renderer_create(renderer_t **result, const char *vert_path,
         .a = 1,
     };
 
-    RET_ON_FAIL(setup_gl(_result, vert_path, frag_path),
-                RENDERER_ERR_ALLOC, RENDERER_ERR_ALLOC,
-                "RENDERER->INTERNAL");
+    uint8_t init_ret_code = setup_gl(_result, vert_path, frag_path);
+    if (init_ret_code != RENDERER_NO_ERR)
+    {
+        ERR("[RENDERER] renderer object creation failed: GL initiation: "
+            "%s",
+            renderer_err_str(init_ret_code));
+    }
 
-    RET_ON_FAIL(setup_arr(_result), RENDERER_ERR_ALLOC, RENDERER_ERR_ALLOC,
-                "RENDERER->INTERNAL");
+    init_ret_code = setup_arr(_result);
+    if (init_ret_code != RENDERER_NO_ERR)
+    {
+        ERR("[RENDERER] renderer object creation failed: array "
+            "initiation: "
+            "%s",
+            renderer_err_str(init_ret_code));
+    }
 
     *result = _result;
     return exit_code;
 
 cleanup:
-    FREE(_result, renderer_destroy);
+    FREE_PTR(&_result, renderer_destroy);
     return exit_code;
 }
 
@@ -187,7 +275,8 @@ uint8_t renderer_colorf(renderer_t *renderer, float r, float g, float b,
 {
     uint8_t exit_code = RENDERER_NO_ERR;
 
-    IS_NULL(renderer, RENDERER_ERR_INVALARG, "RENDERER");
+    IS_NULL(renderer, RENDERER_ERR_INVALARG, "RENDERER",
+            "\'renderer\' argument is NULL");
 
     renderer->col.r = r;
     renderer->col.g = g;
@@ -200,11 +289,13 @@ cleanup:
     return exit_code;
 }
 
-uint8_t renderer_colori(renderer_t *renderer, int r, int g, int b, int a)
+uint8_t renderer_colori(renderer_t *renderer, uint8_t r, uint8_t g,
+                        uint8_t b, uint8_t a)
 {
     uint8_t exit_code = RENDERER_NO_ERR;
 
-    IS_NULL(renderer, RENDERER_ERR_INVALARG, "RENDERER");
+    IS_NULL(renderer, RENDERER_ERR_INVALARG, "RENDERER",
+            "\'renderer\' argument is NULL");
 
     renderer->col.r = (float)r / 255.0f;
     renderer->col.g = (float)g / 255.0f;
@@ -221,7 +312,8 @@ uint8_t renderer_clear(renderer_t *renderer)
 {
     uint8_t exit_code = RENDERER_NO_ERR;
 
-    IS_NULL(renderer, RENDERER_ERR_INVALARG, "RENDERER");
+    IS_NULL(renderer, RENDERER_ERR_INVALARG, "RENDERER",
+            "\'renderer\' argument is NULL");
     glClearColor(renderer->col.r, renderer->col.g, renderer->col.b,
                  renderer->col.a);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -245,30 +337,31 @@ uint8_t renderer_set_viewport(renderer_t *renderer, int32_t x, int32_t y,
     return exit_code;
 }
 
-uint8_t renderer_destroy(renderer_t *renderer)
+uint8_t renderer_destroy(renderer_t **renderer)
 {
     uint8_t exit_code = RENDERER_NO_ERR;
 
-    IS_NULL(renderer, RENDERER_ERR_INVALARG, "RENDERER");
-    IS_NULL(renderer->index_array, RENDERER_ERR_INVALARG, "RENDERER");
-    IS_NULL(renderer->vertex_array, RENDERER_ERR_INVALARG, "RENDERER");
+    IS_NULL(renderer, RENDERER_ERR_INVALARG, "RENDERER", "\'renderer\' pointer is NULL");
+
+    renderer_t *renderer_ptr = *renderer;
+    IS_NULL(renderer_ptr, RENDERER_ERR_INVALARG, "RENDERER", "\'renderer\' is a pointer to NULL");
 
     INFO("[RENDERER] destroying renderer\n");
 
-    FREE_PTR(renderer->vertex_array, array_destroy);
-    FREE_PTR(renderer->index_array, array_destroy);
+    FREE_PTR(&renderer_ptr->vertex_array, array_destroy);
+    FREE_PTR(&renderer_ptr->index_array, array_destroy);
 
-    FREE_PTR(renderer->shader, shader_destroy);
-    
-    glDeleteVertexArrays(1, &renderer->VAO);
-    glDeleteBuffers(1, &renderer->VBO);
-    glDeleteBuffers(1, &renderer->EBO);
+    FREE_PTR(&renderer_ptr->shader, shader_destroy);
 
-    renderer->VAO = 0;
-    renderer->VBO = 0;
-    renderer->EBO = 0;
+    glDeleteVertexArrays(1, &renderer_ptr->VAO);
+    glDeleteBuffers(1, &renderer_ptr->VBO);
+    glDeleteBuffers(1, &renderer_ptr->EBO);
 
-    FREE(renderer, free);
+    renderer_ptr->VAO = 0;
+    renderer_ptr->VBO = 0;
+    renderer_ptr->EBO = 0;
+
+    FREE(renderer_ptr, free);
 
     return exit_code;
 cleanup:
@@ -280,7 +373,7 @@ uint8_t renderer_draw_rect(renderer_t *renderer, int32_t x, int32_t y,
 {
     uint8_t exit_code = RENDERER_NO_ERR;
 
-    IS_NULL(renderer, RENDERER_ERR_INVALARG, "RENDERER");
+    IS_NULL(renderer, RENDERER_ERR_INVALARG, "RENDERER", "\'renderer\' argument is NULL");
 
     float r = renderer->col.r;
     float g = renderer->col.g;
@@ -303,7 +396,7 @@ uint8_t renderer_draw_rect(renderer_t *renderer, int32_t x, int32_t y,
 
     for (size_t i = 0; i < 4; i++)
     {
-        array_put(renderer->vertex_array, &verts[i], sizeof(vertex_t));
+        //array_put(renderer->vertex_array, &verts[i], sizeof(vertex_t));
     }
 
     size_t base_index = renderer->vertex_array->count - 4;
@@ -311,8 +404,8 @@ uint8_t renderer_draw_rect(renderer_t *renderer, int32_t x, int32_t y,
     for (size_t i = 0; i < 6; i++)
     {
         uint32_t adjusted_index = base_index + inds[i];
-        array_put(renderer->index_array, &adjusted_index,
-                  sizeof(uint32_t));
+        //array_put(renderer->index_array, &adjusted_index,
+        //         sizeof(uint32_t));
     }
 
 cleanup:
@@ -322,7 +415,7 @@ cleanup:
 uint8_t renderer_draw_begin(renderer_t *renderer)
 {
     uint8_t exit_code = RENDERER_NO_ERR;
-    IS_NULL(renderer, RENDERER_ERR_INVALARG, "RENDERER");
+    IS_NULL(renderer, RENDERER_ERR_INVALARG, "RENDERER", "\'renderer\' argument is NULL");
 
     array_reset(renderer->vertex_array);
     array_reset(renderer->index_array);
@@ -338,10 +431,8 @@ cleanup:
 uint8_t renderer_draw_end(renderer_t *renderer)
 {
     uint8_t exit_code = RENDERER_NO_ERR;
-    IS_NULL(renderer, RENDERER_ERR_INVALARG, "RENDERER");
-    IS_NULL(renderer->vertex_array, RENDERER_ERR_INVALARG, "RENDERER");
-    IS_NULL(renderer->index_array, RENDERER_ERR_INVALARG, "RENDERER");
-    
+    IS_NULL(renderer, RENDERER_ERR_INVALARG, "RENDERER", "\'renderer\' argument is NULL");
+
     glBufferSubData(GL_ARRAY_BUFFER, 0,
                     renderer->vertex_array->count *
                         renderer->vertex_array->item_size,

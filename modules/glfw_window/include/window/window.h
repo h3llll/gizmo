@@ -1,11 +1,17 @@
 #ifndef MODULES_WINDOW_H
 #define MODULES_WINDOW_H
 
+#include "event/event.h"
 // clang-format off
 #define WIN_NO_ERR              0
 #define WIN_ERR_GLFWERR         1
 #define WIN_ERR_ALLOC           2
 #define WIN_ERR_INVALARG        3
+
+#define WIN_EVENT_DIFF          20
+
+#define WIN_ERR_EVENT_ALLOC     EVENT_ERR_ALLOC     +   WIN_EVENT_DIFF
+#define WIN_ERR_EVENT_INVALARG  EVENT_ERR_INVALARG  +   WIN_EVENT_DIFF
 
 #define WINEVENT_KEY_DOWN            0
 #define WINEVENT_KEY_RELEASED        1
@@ -15,9 +21,9 @@
 #define WINEVENT_MOUSE_SCROLL        5
 // clang-format on
 
-#include "event/event.h"
 #include <GLFW/glfw3.h>
 #include <stdint.h>
+#include "keys.h"
 
 typedef struct key_info
 {
@@ -158,10 +164,10 @@ uint8_t window_get_mouse_pos(window_t *window, double *x_result,
 uint8_t input_device_create(input_device_t **result);
 
 /**
- * Frees input_device heap object.
+ * Frees input_device heap object and NULLs its pointer.
  * Returns WIN_NO_ERR on success, 0< on failure.
- */
-uint8_t input_device_destroy(input_device_t *dev);
+*/
+uint8_t input_device_destroy(input_device_t **dev);
 
 // key_info_
 /**
@@ -174,7 +180,7 @@ uint8_t key_info_create(int32_t key, int32_t scancode, int32_t mods,
  * Frees key_info heap object.
  * Returns WIN_NO_ERR on success, 0< on failure.
  */
-uint8_t key_info_destroy(key_info_t *keyinfo);
+uint8_t key_info_destroy(key_info_t **keyinfo);
 
 // mb_info_
 /**
@@ -187,7 +193,7 @@ uint8_t mb_info_create(int32_t button, int32_t mods, mb_info_t **result);
  * Frees mb_info heap object.
  * Returns WIN_NO_ERR on success, 0< on failure.
  */
-uint8_t mb_info_destroy(mb_info_t *mbinfo);
+uint8_t mb_info_destroy(mb_info_t **mbinfo);
 
 // mp_info_
 /**
@@ -200,7 +206,7 @@ uint8_t mp_info_create(double x, double y, mp_info_t **result);
  * Creates mp_info heap object.
  * Returns WIN_NO_ERR on success, 0< on failure.
  */
-uint8_t mp_info_destroy(mp_info_t *mpinfo);
+uint8_t mp_info_destroy(mp_info_t **mpinfo);
 
 // ms_info_
 /**
@@ -213,6 +219,6 @@ uint8_t ms_info_create(double xoffset, double yoffset, ms_info_t **result);
  * Creates mp_info heap object.
  * Returns WIN_NO_ERR on success, 0< on failure.
  */
-uint8_t ms_info_destroy(ms_info_t *msinfo);
+uint8_t ms_info_destroy(ms_info_t **msinfo);
 
 #endif

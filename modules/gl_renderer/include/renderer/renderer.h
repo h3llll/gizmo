@@ -12,59 +12,27 @@
 #define MAX_FRAME_VERTICES  1000000
 #define MAX_FRAME_FLOATS    (FLOATS_PER_VERTEX * MAX_FRAME_VERTICES)
 #define MAX_FRAME_INDICES  (MAX_FRAME_VERTICES * 3)
-
-#define TO_NDC_X(px, screen_w)\
-    (((float)(px) / screen_w) * 2.0f - 1.0f)
-
-#define TO_NDC_Y(py, screen_h)\
-    (1.0f - ((float)(py) / screen_h) * 2.0f)
-
 // clang-format on
 
 #include "libraries.h"
 #include RENDERER_SHADER_INCLUDE
 #include <stdint.h>
 
-// Int representation of color, tiny bit slower to use since it is devided
-// by 255 passing through renderer_colori
-typedef struct colori
-{
-    int8_t r, g, b, a;
-} colori_t;
+// Int representation of color.
+typedef struct colori colori_t;
 
 // Float representation of color, tiny bit faster to use
 // since there's no division needed to transform
-typedef struct colorf
-{
-    float r, g, b, a;
-} colorf_t;
+typedef struct colorf colorf_t;
 
-typedef struct vertex
-{
-    float x, y, z;    // pos
-    float r, g, b, a; // col
-    float u, v;       // text
-    float nx, ny, nz; // norm
-} vertex_t;
+typedef struct vertex vertex_t;
 
 // Holds position and other information for the viewport
-typedef struct camera
-{
-
-} camera_t;
-
+typedef struct camera camera_t;
 
 // Holds renderer information such as color and buffer objects.
-typedef struct renderer
-{
-    array *vertex_array;
-    array *index_array;
-    shader_t *shader;
-    colorf_t col;
-    uint32_t VAO, VBO, EBO;
-    int32_t v_width, v_height;
+typedef struct renderer renderer_t;
 
-} renderer_t;
 /**
  * Initializes gl loader with the procedure address getter argument.
  * Returns RENDERER_NO_ERR on success, 0< on failure.
@@ -94,7 +62,8 @@ uint8_t renderer_create(renderer_t **result, const char *vert_path,
  * Sets the renderer's colors to the specified channel values.
  * Returns RENDERER_NO_ERR on success.
  */
-uint8_t renderer_colori(renderer_t *renderer, int r, int g, int b, int a);
+uint8_t renderer_colori(renderer_t *renderer, uint8_t r, uint8_t g,
+                        uint8_t b, uint8_t a);
 
 /**
  * Sets the renderer's colors to the specified channel values.
@@ -115,7 +84,7 @@ uint8_t renderer_clear(renderer_t *renderer);
  */
 uint8_t renderer_set_viewport(renderer_t *renderer, int32_t x, int32_t y,
                               int32_t width, int32_t height);
-    
+
 // Binds GPU buffers and objects and resets vertex/index arrays.
 // Returns RENDERER_NO_ERR on success, 0< otherwise.
 uint8_t renderer_draw_begin(renderer_t *renderer);
@@ -134,6 +103,6 @@ uint8_t renderer_draw_end(renderer_t *renderer);
  * Frees the renderer's memory.
  * Returns RENDERER_NO_ERR on success.
  */
-uint8_t renderer_destroy(renderer_t *renderer);
+uint8_t renderer_destroy(renderer_t **renderer);
 
 #endif

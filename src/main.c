@@ -13,7 +13,7 @@ void ms_cb(event_t *ev)
 
     const ms_info_t *ms_info;
 
-    event_get_data(ev, (const void **)&ms_info);
+    event_get_data_ptr(ev, (const void **)&ms_info);
 
     printf("mouse scroll: xoff: %f, yoff: %f", ms_info->xoffset,
            ms_info->yoffset);
@@ -70,8 +70,8 @@ int main(void)
         window_swap_buffers(window);
     }
 
-    renderer_destroy(renderer);
-    window_destroy(window);
+    renderer_destroy(&renderer);
+    window_destroy(&window);
     window_module_deinit();
     return 0;
 }

@@ -38,7 +38,7 @@ cleanup:
 uint8_t stream_create(stream_t **result)
 {
     uint8_t exit_code = AUDIO_NO_ERR;
-    IS_NULL(result, AUDIO_ERR_INVALARG, "AUDIO");
+    IS_NULL(result, AUDIO_ERR_INVALARG, "AUDIO", "\'result\' argument is NULL");
 
 cleanup:
     return exit_code;

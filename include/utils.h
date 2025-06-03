@@ -83,13 +83,13 @@
         }                                                                 \
     } while (0)
 
-#define FREE_PTR(ptr, free_fn)                                            \
+#define FREE_PTR(ptr_to_ptr, free_fn)                                     \
     do                                                                    \
     {                                                                     \
-        if (ptr != NULL)                                                  \
+        if (*ptr_to_ptr != NULL)                                          \
         {                                                                 \
-            free_fn(&(ptr));                                              \
-            ptr = NULL;                                                   \
+            free_fn(ptr_to_ptr);                                         \
+            *ptr_to_ptr = NULL;                                           \
         }                                                                 \
     } while (0)
 

@@ -1,11 +1,13 @@
-#include "dyarr/dyarr.h"
+#include "libraries.h"
+#include DYARR_INCLUDE
 #include "utils.h"
 #include <stdlib.h>
 #include <string.h>
 
-// TODO (most likely) this module causes a nested??(asan says so) segfault
+// TODO (most likely) this module causes a nested segfault??(asan says so)
 //
 // I HAVE NO IDEA WHY
+// HELP
 
 char *array_err_str(uint8_t code)
 {

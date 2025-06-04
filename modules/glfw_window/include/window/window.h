@@ -25,52 +25,44 @@
 #include <stdint.h>
 #include "keys.h"
 
-typedef struct key_info
+struct key_info
 {
     int32_t key;
     int32_t scancode;
     int32_t mods;
-} key_info_t;
+};
 
-typedef struct mb_info
+struct mb_info
 {
     int32_t button;
     int32_t mods;
-} mb_info_t;
+};
 
-typedef struct mp_info
+struct mp_info
 {
     double x, y;
-} mp_info_t;
+};
 
-typedef struct ms_info
+struct ms_info
 {
     double xoffset, yoffset;
-} ms_info_t;
+};
 
-typedef struct input_device
-{
-    event_t *key_down_event, *key_released_event;
-    event_t *mouse_motion_event, *mb_down_event, *mb_released_event,
-        *mouse_scroll_event;
-    event_system_t *event_sys;
-    key_info_t *keyinfo;
-    mb_info_t *mbinfo;
-    mp_info_t *mpinfo;
-    ms_info_t *msinfo;
+typedef struct key_info key_info_t;
 
-} input_device_t;
+typedef struct mb_info mb_info_t;
 
-typedef struct window
-{
-    GLFWwindow *data;
-    input_device_t *input_device;
-    int32_t width, height;
+typedef struct mp_info mp_info_t;
 
-} window_t;
+typedef struct ms_info ms_info_t;
+
+typedef struct input_device input_device_t;
+
+typedef struct window window_t;
 
 typedef GLFWframebuffersizefun win_framebuffersizefun_t;
-typedef GLFWwindow win_data_t;
+
+typedef event_callback_t window_input_callback_t;
 
 // window_
 /**
@@ -108,7 +100,7 @@ uint8_t window_poll_events(void);
  * Deallocates window object and destroys glfw context
  * Returns WIN_NO_ERR on success, 0< on failure.
  */
-uint8_t window_destroy(window_t *win);
+uint8_t window_destroy(window_t **win);
 
 /**
  * Terminates GLFW.

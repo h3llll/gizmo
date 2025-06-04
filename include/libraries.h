@@ -3,11 +3,11 @@
 
 // ----------- WINDOW
 
-#ifdef USE_GLFW
-#define WINDOW_INCLUDE "window/glfw_window.h"
-#else /* USE_GLFW */
+#ifdef USE_SDL
 #define WINDOW_INCLUDE "sdl_window/include/window/window.h"
-#endif /* USE_GLFW */
+#else /* USE_SDL */
+#define WINDOW_INCLUDE "glfw_window/include/window/window.h"
+#endif /* USE_SDL */ 
 
 // ----------- RENDERER
 
@@ -27,5 +27,10 @@
 // ----------- DYARR
 #define DYARR_INCLUDE "dyarr/dyarr.h"
 
+// ----------- IO
+#define IO_INCLUDE "io/io.h"
+
+// ----------- UTIL
+#define UTIL_INCLUDE "utils.h"
 
 #endif /* LIBRARIES_H */

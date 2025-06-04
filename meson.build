@@ -13,8 +13,8 @@ project(
 )
 
 USE_SDL = false # false: glfw
-USE_GL = true   # false: vulkan
-USE_PA = true   #false: idk yet maybe it's js gonna be only port audio
+USE_GL = true # false: vulkan
+USE_PA = true #false: idk yet maybe it's js gonna be only port audio
 
 add_global_arguments('-DDEBUG_BUILD', '-DACTIVE_LOG_LEVEL=3', language: 'c')
 
@@ -24,9 +24,10 @@ inc_root = include_directories('include', 'modules')
 # lower level modules
 subdir('modules/dyarr')
 subdir('modules/event')
+subdir('modules/io')
 
 if USE_SDL
-  subdir('modules/sdl_window')
+  # subdir('modules/sdl_window')
 else
   subdir('modules/glfw_window')
 endif
@@ -34,11 +35,12 @@ endif
 if USE_GL
   subdir('modules/gl_renderer')
 else
-  subdir('modules/vk_renderer')
+  #  subdir('modules/vk_renderer')
 endif
 
 subdir('modules/audio')
 
+io_dep = dependency('io')
 dyarr_dep = dependency('dyarr')
 event_dep = dependency('event')
 renderer_dep = dependency('renderer')
@@ -60,6 +62,7 @@ executable(
     event_dep,
     dyarr_dep,
     audio_dep,
+    io_dep,
   ],
   include_directories: [
     inc_root,

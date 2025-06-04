@@ -41,7 +41,6 @@ uint8_t shader_compile(uint32_t shader, int32_t type)
     char log[512] = "no err";
     glCompileShader(shader);
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-
     if (!success)
     {
         glGetShaderInfoLog(shader, 512, NULL, log);

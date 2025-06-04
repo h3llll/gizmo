@@ -6,6 +6,25 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+struct input_device
+{
+    event_t *key_down_event, *key_released_event;
+    event_t *mouse_motion_event, *mb_down_event, *mb_released_event,
+        *mouse_scroll_event;
+    event_system_t *event_sys;
+    key_info_t *keyinfo;
+    mb_info_t *mbinfo;
+    mp_info_t *mpinfo;
+    ms_info_t *msinfo;
+};
+
+struct window
+{
+    GLFWwindow *data;
+    input_device_t *input_device;
+    int32_t width, height;
+};
+
 char *window_err_str(uint8_t code)
 {
     switch (code)
@@ -553,6 +572,19 @@ uint8_t input_device_destroy(input_device_t **dev)
 
     return exit_code;
 
+cleanup:
+    return exit_code;
+}
+
+uint8_t window_reg_input_callback(window_t *win, window_input_callback_t *callback)
+{
+    uint8_t exit_code = WIN_NO_ERR;
+    
+    IS_NULL(win, WIN_ERR_INVALARG, "WINDOW", "\'win\' argument is NULL");
+
+    event_system_register(win->input_device->event_sys, callback);
+
+    return exit_code;
 cleanup:
     return exit_code;
 }

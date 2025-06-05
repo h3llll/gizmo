@@ -21,9 +21,9 @@
 #define WINEVENT_MOUSE_SCROLL        5
 // clang-format on
 
+#include "keys.h"
 #include <GLFW/glfw3.h>
 #include <stdint.h>
-#include "keys.h"
 
 struct key_info
 {
@@ -144,10 +144,23 @@ uint8_t window_mousebutton_released(window_t *window, int button);
 
 /**
  * Returns mouse's x and y position in their respective result pointers.
- * Returns 0 on success.
+ * Returns WIN_NO_ERR on success.
  */
 uint8_t window_get_mouse_pos(window_t *window, double *x_result,
                              double *y_result);
+/**
+ * Registers given function to be called whenever an input event is fired
+ * with an event argument. Returns WIN_NO_ERR on success, 0< on failure.
+ */
+uint8_t window_reg_input_callback(window_t *win,
+                                  window_input_callback_t *callback);
+/**
+ * Returns given window's width and height in their respective result
+ * pointer. Returns WIN_NO_ERR on success, 0< on failure.
+ */
+uint8_t window_get_dimentions(window_t *win, int32_t *result_width,
+                              int32_t *result_height);
+
 // input_device_
 /**
  * Creates input_device heap object.
@@ -158,7 +171,7 @@ uint8_t input_device_create(input_device_t **result);
 /**
  * Frees input_device heap object and NULLs its pointer.
  * Returns WIN_NO_ERR on success, 0< on failure.
-*/
+ */
 uint8_t input_device_destroy(input_device_t **dev);
 
 // key_info_

@@ -1,5 +1,5 @@
-#include "libraries.h"
 #include "event/event.h"
+#include "libraries.h"
 #include RENDERER_INCLUDE
 #include "utils.h"
 #include WINDOW_INCLUDE
@@ -27,17 +27,20 @@ int main(void)
 
     // Never initialize renderer module before creating a window
     renderer_module_init((void *)window_get_proc);
-    event_system_register(window->input_device->event_sys, ms_cb);
+    window_reg_input_callback(window, ms_cb);
 
     renderer_t *renderer;
     WARN("%d", renderer_create(&renderer, "", ""));
     int32_t x = 1;
     int32_t y = 1;
+    int32_t win_width;
+    int32_t win_height;
 
     while (!window_closing(window))
     {
-        renderer_set_viewport(renderer, 0, 0, window->width,
-                              window->height);
+        window_get_dimentions(window, &win_width, &win_height);
+        renderer_set_viewport(renderer, 0, 0, win_width, win_height);
+
         window_poll_events();
 
         if (window_key_pressed(window, KEY_D))

@@ -576,10 +576,30 @@ cleanup:
     return exit_code;
 }
 
-uint8_t window_reg_input_callback(window_t *win, window_input_callback_t *callback)
+uint8_t window_get_dimentions(window_t *win, int32_t *result_width,
+                              int32_t *result_height)
 {
     uint8_t exit_code = WIN_NO_ERR;
-    
+
+    IS_NULL(win, WIN_ERR_INVALARG, "WINDOW", "\'win\' argument is NULL");
+    IS_NULL(result_width, WIN_ERR_INVALARG, "WINDOW",
+            "\'result_width\' argument is NULL");
+    IS_NULL(result_height, WIN_ERR_INVALARG, "WINDOW",
+            "\'result_height\' argument is NULL");
+
+    *result_height = win->height;
+    *result_width = win->width;
+
+    return exit_code;
+cleanup:
+    return exit_code;
+}
+
+uint8_t window_reg_input_callback(window_t *win,
+                                  window_input_callback_t *callback)
+{
+    uint8_t exit_code = WIN_NO_ERR;
+
     IS_NULL(win, WIN_ERR_INVALARG, "WINDOW", "\'win\' argument is NULL");
 
     event_system_register(win->input_device->event_sys, callback);
